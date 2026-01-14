@@ -11,6 +11,9 @@ WhatsApp-first conversational commerce MVP for **ElixoSense Kenya**:
 ### Locked stack / “build-to-spec” rules
 - **Stack defaults**: `docs/inputs/cursor-locked-stack.md`
 - **Architecture decisions (ADRs)**: `docs/adr/`
+- **Industry standards & compliance**: `docs/INDUSTRY_STANDARDS.md`
+- **Security checklist**: `docs/SECURITY_CHECKLIST.md`
+- **Quick reference**: `docs/STANDARDS_QUICK_REF.md`
 
 ## Getting Started
 
