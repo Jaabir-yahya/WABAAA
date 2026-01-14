@@ -1,0 +1,27 @@
+# Monorepo root ignore rules
+
+# OS/editor
+.DS_Store
+
+# Dependencies
+**/node_modules/
+**/.npm-cache/
+
+# Next.js
+**/.next/
+**/out/
+**/build/
+
+# Coverage
+**/coverage/
+
+# Vercel
+**/.vercel/
+
+# TypeScript build artifacts
+**/*.tsbuildinfo
+
+# Env files (never commit secrets)
+**/.env*
+!**/env.example
+
