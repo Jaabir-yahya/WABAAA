@@ -1,0 +1,86 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: containerx
+      POSTGRES_PASSWORD: containerx123
+      POSTGRES_DB: containerx_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U containerx"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ../backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://containerx:containerx123@postgres:5432/containerx_db
+      REDIS_URL: redis://redis:6379/0
+      AT_USERNAME: ${AT_USERNAME}
+      AT_API_KEY: ${AT_API_KEY}
+      AT_WEBHOOK_SECRET: ${AT_WEBHOOK_SECRET}
+      ENVIRONMENT: development
+      SECRET_KEY: ${SECRET_KEY:-change-me}
+    volumes:
+      - ../backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  celery-worker:
+    build: ../backend
+    environment:
+      DATABASE_URL: postgresql://containerx:containerx123@postgres:5432/containerx_db
+      REDIS_URL: redis://redis:6379/0
+      AT_USERNAME: ${AT_USERNAME}
+      AT_API_KEY: ${AT_API_KEY}
+    volumes:
+      - ../backend:/app
+    depends_on:
+      - redis
+      - postgres
+    command: celery -A src.tasks.celery_app worker --loglevel=info
+
+  celery-beat:
+    build: ../backend
+    environment:
+      DATABASE_URL: postgresql://containerx:containerx123@postgres:5432/containerx_db
+      REDIS_URL: redis://redis:6379/0
+      AT_USERNAME: ${AT_USERNAME}
+      AT_API_KEY: ${AT_API_KEY}
+    volumes:
+      - ../backend:/app
+    depends_on:
+      - redis
+      - postgres
+    command: celery -A src.tasks.celery_app beat --loglevel=info
+
+volumes:
+  postgres_data:
+  redis_data:
