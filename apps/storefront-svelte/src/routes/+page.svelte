@@ -21,9 +21,9 @@
 			id="businessId"
 			placeholder="mfano: elixosense"
 			bind:value={businessId}
-			on:keydown={(event) => event.key === 'Enter' && goToStorefront()}
+			onkeydown={(event) => event.key === 'Enter' && goToStorefront()}
 		/>
-		<button on:click={goToStorefront}>Fungua Duka</button>
+		<button onclick={goToStorefront}>Fungua Duka</button>
 	</div>
 
 	<div class="tips">

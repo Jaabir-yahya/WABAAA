@@ -48,6 +48,11 @@
 
 	onMount(async () => {
 		const id = businessId();
+		if (!id) {
+			error = 'Biashara haijapatikana.';
+			loading = false;
+			return;
+		}
 		await loadBusiness(id);
 		shareUrl = `${window.location.origin}/store/${id}`;
 	});
