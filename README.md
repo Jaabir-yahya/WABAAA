@@ -298,10 +298,16 @@ The UI is in Swahili by default. English is a toggle, not the primary language.
 - **[TEST-REPORT.md](TEST-REPORT.md)** - Comprehensive test results (47/47 passed)
 - **[PHASE1-COMPLETE.md](PHASE1-COMPLETE.md)** - Phase 1 completion summary
 
-### 🚀 Phase 2 Documentation
+### 🚀 Phase 2 Documentation (HYBRID STRATEGY)
+- **[PHASE2-STRATEGY-DECISION.md](PHASE2-STRATEGY-DECISION.md)** - ⭐ Strategic decision & hybrid approach
 - **[PHASE2-ROADMAP.md](PHASE2-ROADMAP.md)** - 8-week deployment & validation plan
+- **[PHASE2-WEEKLY-CHECKLIST.md](PHASE2-WEEKLY-CHECKLIST.md)** - Week-by-week execution checklist
 - **[PHASE2-MERCHANT-ONBOARDING.md](PHASE2-MERCHANT-ONBOARDING.md)** - Merchant onboarding guide
 - **[TOMORROW-START-HERE.md](TOMORROW-START-HERE.md)** - Next steps for deployment
+
+### 📊 Market Research (Optional Reading)
+- **[KENYA-MARKET-RESEARCH.md](KENYA-MARKET-RESEARCH.md)** - Deep dive into Kenyan commerce (809 lines)
+- **[MARKET-FIT-ASSESSMENT.md](MARKET-FIT-ASSESSMENT.md)** - Gap analysis & recommendations (436 lines)
 
 ### 🏗️ Architecture & Design
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Technical system design + 7 diagrams
