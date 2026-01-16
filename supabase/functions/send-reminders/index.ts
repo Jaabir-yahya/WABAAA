@@ -3,6 +3,7 @@ import { errorResponse, HttpError, jsonResponse } from "../_shared/errors.ts";
 import { parseJson, ensureBusinessActive } from "../_shared/auth.ts";
 import { sendWhatsAppMessage } from "../_shared/whatsapp-send.ts";
 import { sendPaymentReminder } from "../_shared/sms.ts";
+import { enforceRateLimit } from "../_shared/security-audit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -75,6 +76,18 @@ export async function handleRequest(req: Request) {
     }
 
     await ensureBusinessActive(input.business_id);
+
+    const ipAddress = req.headers.get("x-forwarded-for") ?? "unknown";
+    const userAgent = req.headers.get("user-agent") ?? "unknown";
+    await enforceRateLimit({
+      key: `send-reminders:${input.business_id}:${ipAddress}`,
+      max: 5,
+      windowMs: 60_000,
+      businessId: input.business_id,
+      action: "send-reminders",
+      ipAddress,
+      userAgent,
+    });
 
     const daysOverdue = Math.max(1, input.days_overdue ?? 2);
     const limit = Math.min(50, Math.max(1, input.limit ?? 25));

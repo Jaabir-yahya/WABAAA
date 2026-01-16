@@ -2,6 +2,7 @@ import { getSupabaseClient } from "../_shared/db.ts";
 import { errorResponse, HttpError, jsonResponse } from "../_shared/errors.ts";
 import { sendWhatsAppMessage } from "../_shared/whatsapp-send.ts";
 import { sendSMS, sendPaymentReminder } from "../_shared/sms.ts";
+import { enforceRateLimit } from "../_shared/security-audit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,6 +44,18 @@ Deno.serve(async (req) => {
     const { startUtc, endUtc } = getNairobiDayBounds();
     const input = (await req.json().catch(() => ({}))) as DailySummaryRequest;
     const businessId = input.business_id ?? DEFAULT_BUSINESS_ID;
+
+    const ipAddress = req.headers.get("x-forwarded-for") ?? "unknown";
+    const userAgent = req.headers.get("user-agent") ?? "unknown";
+    await enforceRateLimit({
+      key: `daily-summary:${businessId}:${ipAddress}`,
+      max: 5,
+      windowMs: 60_000,
+      businessId,
+      action: "daily-summary",
+      ipAddress,
+      userAgent,
+    });
 
     const [{ data: payments }, { data: orders }] = await Promise.all([
           supabase

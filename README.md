@@ -72,6 +72,12 @@ PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 PUBLIC_BUSINESS_ID=elixosense
 ```
 
+**Storefront Svelte App** (`apps/storefront-svelte/.env`):
+```bash
+PUBLIC_SUPABASE_URL=https://wwjsvzhosbrsotmknrtp.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
+
 **Supabase Edge Functions** (project env vars):
 ```bash
 MPESA_CONSUMER_KEY=...
@@ -88,6 +94,12 @@ WHATSAPP_ACCESS_TOKEN=...
 ```bash
 cd /path/to/WABAAA
 cd apps/merchant-svelte && npm install
+npm run dev  # http://localhost:5173
+```
+
+### Storefront App (Digital Duka)
+```bash
+cd apps/storefront-svelte && npm install
 npm run dev  # http://localhost:5173
 ```
 

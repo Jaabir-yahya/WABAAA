@@ -2,6 +2,7 @@ import { CorrectOrderSchema } from "./schema.ts";
 import { ensureBusinessActive, parseJson } from "../_shared/auth.ts";
 import { getSupabaseClient } from "../_shared/db.ts";
 import { errorResponse, HttpError, jsonResponse } from "../_shared/errors.ts";
+import { enforceRateLimit } from "../_shared/security-audit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,6 +26,18 @@ Deno.serve(async (req) => {
     const input = CorrectOrderSchema.parse(body);
 
     await ensureBusinessActive(input.business_id);
+
+    const ipAddress = req.headers.get("x-forwarded-for") ?? "unknown";
+    const userAgent = req.headers.get("user-agent") ?? "unknown";
+    await enforceRateLimit({
+      key: `correct-order:${input.business_id}:${ipAddress}`,
+      max: 10,
+      windowMs: 60_000,
+      businessId: input.business_id,
+      action: "correct-order",
+      ipAddress,
+      userAgent,
+    });
 
     const supabase = getSupabaseClient();
     const { data: existingOrder, error: orderError } = await supabase

@@ -1,6 +1,7 @@
 import { getSupabaseClient } from "../_shared/db.ts";
 import { jsonResponse } from "../_shared/errors.ts";
 import { logQRConversion } from "../_shared/qr-analytics.ts";
+import { enforceRateLimit } from "../_shared/security-audit.ts";
 
 // NOTE: Deploy this function with verify_jwt=false because Daraja callbacks
 // are unsigned webhooks and cannot include Supabase JWTs.
@@ -184,6 +185,18 @@ export function createMpesaCallbackHandler(
     }
 
     try {
+      const ipAddress = req.headers.get("x-forwarded-for") ?? "unknown";
+      const userAgent = req.headers.get("user-agent") ?? "unknown";
+      await enforceRateLimit({
+        key: `mpesa-callback:${ipAddress}`,
+        max: 120,
+        windowMs: 60_000,
+        businessId: "system",
+        action: "mpesa-callback",
+        ipAddress,
+        userAgent,
+      });
+
       const payload = (await req.json()) as MpesaCallbackPayload;
       const stkCallback = payload.Body?.stkCallback;
 
