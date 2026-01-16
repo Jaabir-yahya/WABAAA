@@ -13,12 +13,12 @@
 DELETED:
 ├── containerx/           ← Moved to archive/containerx-old/
 ├── elixosense-whatsapp/  ← Moved to archive/elixosense-old/
-└── docs/                 ← Merged into kenya-commerce-os/docs/
+└── docs/                 ← Merged into repo-root/docs/
 
 KEPT:
 ├── archive/              ← Reference for old code
 ├── humandocs/            ← Human context documents
-└── kenya-commerce-os/    ← 🎯 ACTIVE PROJECT
+└── repo-root/    ← 🎯 ACTIVE PROJECT
 ```
 
 ### ✅ **Phase 2: Kenya Commerce OS Cleanup**
@@ -56,7 +56,7 @@ ADDED:
 │   ├── KENYA_COMMERCE_OS_CONTEXT_DUMP.md
 │   └── ...
 │
-└── kenya-commerce-os/            🎯 ACTIVE PROJECT
+└── repo-root/            🎯 ACTIVE PROJECT
     ├── .gitignore                ✅ NEW
     ├── .env.example              ✅ NEW
     ├── SPEC.md                   🔒 Frozen spec
@@ -161,7 +161,7 @@ ADDED:
 If you have **Supabase credentials ready**:
 
 ```bash
-cd kenya-commerce-os/packages/database
+cd repo-root/packages/database
 
 # 1. Install dependencies
 npm install
@@ -362,7 +362,7 @@ supabase db ping
 
 **Next command:**
 ```bash
-cd kenya-commerce-os/packages/database
+cd repo-root/packages/database
 npm install
 supabase init
 ```

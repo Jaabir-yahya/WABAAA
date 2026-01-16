@@ -398,7 +398,7 @@ ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 
 **First Command to Run:**
 ```bash
-cd /Users/jaabirahmed/Documents/projects/WABAAA/kenya-commerce-os/packages/database
+cd /Users/jaabirahmed/Documents/projects/WABAAA/repo-root/packages/database
 npm install
 ```
 

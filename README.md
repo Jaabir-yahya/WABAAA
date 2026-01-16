@@ -85,7 +85,7 @@ WHATSAPP_APP_SECRET=...
 
 ### Install + Run
 ```bash
-cd /Users/jaabirahmed/Documents/projects/WABAAA/kenya-commerce-os
+cd /path/to/WABAAA
 cd packages/database && npm install
 cd ../../apps/merchant && npm install
 cd ../../apps/merchant && npm run dev
@@ -112,7 +112,7 @@ See `SPEC.md` for event types and immutability rules.
 ## 📁 Project Structure
 
 ```
-kenya-commerce-os/
+repo-root/
 ├── apps/                      # Frontend applications
 │   ├── admin/                # Admin dashboard (super-admin)
 │   ├── merchant/             # 🌟 Merchant organizer (main PWA)

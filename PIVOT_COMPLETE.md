@@ -8,7 +8,7 @@
 ## 📊 What Was Done
 
 ### ✅ 1. Project Restructure
-- ✅ Created unified `kenya-commerce-os/` directory
+- ✅ Created unified repo root for Kenya Commerce OS
 - ✅ Archived old code (`archive/containerx-old/`, `archive/elixosense-old/`)
 - ✅ Established clean monorepo structure
 
@@ -63,7 +63,7 @@ Complete React app with:
 ## 📁 Final Structure
 
 ```
-kenya-commerce-os/                    ← NEW UNIFIED PROJECT
+repo-root/                            ← NEW UNIFIED PROJECT
 ├── apps/
 │   ├── admin/                       (skeleton, for future)
 │   ├── merchant/                    ✅ COMPLETE React PWA
@@ -102,7 +102,7 @@ kenya-commerce-os/                    ← NEW UNIFIED PROJECT
 
 ### Phase 1: Supabase Setup (TODAY)
 ```bash
-cd kenya-commerce-os/packages/database
+cd /path/to/WABAAA/packages/database
 
 # 1. Initialize Supabase
 supabase init
@@ -125,7 +125,7 @@ npm run types
 
 ### Phase 2: Merchant App Setup (TODAY)
 ```bash
-cd kenya-commerce-os/apps/merchant
+cd /path/to/WABAAA/apps/merchant
 
 # 1. Install dependencies
 npm install
@@ -227,17 +227,17 @@ npm run dev
 
 ```bash
 # Start everything locally
-cd kenya-commerce-os/packages/database && supabase start
-cd kenya-commerce-os/apps/merchant && npm run dev
+cd /path/to/WABAAA/packages/database && supabase start
+cd /path/to/WABAAA/apps/merchant && npm run dev
 
 # Run migrations
-cd kenya-commerce-os/packages/database && npm run migrate
+cd /path/to/WABAAA/packages/database && npm run migrate
 
 # Generate types
-cd kenya-commerce-os/packages/database && npm run types
+cd /path/to/WABAAA/packages/database && npm run types
 
 # Test parser
-cd kenya-commerce-os/packages/core
+cd /path/to/WABAAA/packages/core
 node -e "
 const { createParser } = require('./chaos-parser/index.ts');
 const parser = createParser();
@@ -245,7 +245,7 @@ console.log(parser.parse('Nataka 2 kg sukari'));
 "
 
 # Deploy merchant app
-cd kenya-commerce-os/apps/merchant && vercel deploy
+cd /path/to/WABAAA/apps/merchant && vercel deploy
 ```
 
 ---
@@ -350,7 +350,7 @@ cd kenya-commerce-os/apps/merchant && vercel deploy
 ---
 
 **Status:** Ready for Supabase setup and first deployment  
-**Next Action:** Run `cd kenya-commerce-os/packages/database && supabase init`  
+**Next Action:** Run `cd /path/to/WABAAA/packages/database && supabase init`
 **Goal:** ElixoSense processes first real order within 7 days  
 **Vision:** 1000+ Kenyan merchants organized within 6 months  
 

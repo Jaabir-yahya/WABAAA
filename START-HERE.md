@@ -21,7 +21,7 @@ You successfully integrated:
 
 ### **Core Documents (Read These First)**
 ```
-kenya-commerce-os/
+repo-root/
 ├── START-HERE.md              ← 👈 YOU ARE HERE
 ├── SPEC.md                    ← 🔒 FROZEN spec (immutable constraints)
 ├── INTEGRATION-PLAN.md        ← 📋 14-day timeline with tasks
@@ -65,17 +65,17 @@ docs/                          ← Full documentation
 
 1. **Read SPEC.md** (understand what's frozen)
    ```bash
-   open kenya-commerce-os/SPEC.md
+   open SPEC.md
    ```
 
 2. **Scan INTEGRATION-PLAN.md** (see 14-day timeline)
    ```bash
-   open kenya-commerce-os/INTEGRATION-PLAN.md
+   open INTEGRATION-PLAN.md
    ```
 
 3. **Review AGENT-BOUNDARIES.md** (know agent rules)
    ```bash
-   open kenya-commerce-os/AGENT-BOUNDARIES.md
+   open AGENT-BOUNDARIES.md
    ```
 
 ---
@@ -94,7 +94,7 @@ docs/                          ← Full documentation
 
 1. **Create new migration** (30 min)
    ```bash
-   cd kenya-commerce-os/packages/database/migrations
+   cd packages/database/migrations
    
    # Create file: 0003_create_explicit_orders_payments.sql
    # See INTEGRATION-PLAN.md Day 1 section for exact SQL
@@ -264,7 +264,9 @@ TESTS: [specific validation]
 ### **Daily Commands**
 ```bash
 # Navigate to project
-cd kenya-commerce-os
+cd /path/to/WABAAA
+# Navigate to project
+cd /path/to/WABAAA
 
 # Start Supabase
 cd packages/database && supabase start
@@ -347,7 +349,7 @@ You'll know you're done when:
 
 ### **Your First Command:**
 ```bash
-cd kenya-commerce-os
+cd /path/to/WABAAA
 open SPEC.md  # Read the frozen spec
 ```
 

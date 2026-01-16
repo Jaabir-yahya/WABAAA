@@ -10,7 +10,7 @@
 
 ### **What We Have (Good ✅)**
 ```
-kenya-commerce-os/
+repo-root/
 ├── SPEC.md                    ✅ Frozen spec (keep)
 ├── INTEGRATION-PLAN.md        ✅ 14-day plan (keep)
 ├── AGENT-BOUNDARIES.md        ✅ Agent rules (keep)
@@ -27,7 +27,7 @@ kenya-commerce-os/
 
 ### **What's Redundant (Clean 🧹)**
 ```
-kenya-commerce-os/
+repo-root/
 ├── apps/
 │   ├── merchant/              🔄 DUPLICATE (we have frontend/)
 │   ├── admin/                 📁 EMPTY (delete for now)
@@ -37,12 +37,12 @@ kenya-commerce-os/
 ROOT LEVEL (outside kenya-commerce-os):
 ├── containerx/                ⚠️ OLD (already archived, can delete)
 ├── elixosense-whatsapp/       ⚠️ OLD (already archived, can delete)
-└── docs/                      🔄 DUPLICATE (merged into kenya-commerce-os/docs)
+└── docs/                      🔄 DUPLICATE (merged into repo-root/docs)
 ```
 
 ### **What's Missing (Add ➕)**
 ```
-kenya-commerce-os/
+repo-root/
 ├── .gitignore                 ➕ Need proper ignore rules
 ├── .env.example               ➕ Environment variables template
 └── packages/database/
@@ -63,13 +63,13 @@ rm -rf containerx
 # Delete old elixosense-whatsapp (already in archive/)
 rm -rf elixosense-whatsapp
 
-# Delete old docs (already in kenya-commerce-os/docs/)
+# Delete old docs (already in repo-root/docs/)
 rm -rf docs
 
 # Keep only:
 # - archive/ (reference)
 # - humandocs/ (human context)
-# - kenya-commerce-os/ (active project)
+# - repo-root/ (active project)
 ```
 
 ### **Phase 2: Consolidate Frontend (10 min)**
@@ -119,7 +119,7 @@ rm -rf docs
 # What remains:
 # - archive/ (old code reference)
 # - humandocs/ (human context)
-# - kenya-commerce-os/ (active project)
+# - repo-root/ (active project)
 ```
 
 **Verify:**
@@ -128,7 +128,7 @@ ls -la
 # Should see only:
 # - archive/
 # - humandocs/
-# - kenya-commerce-os/
+# - repo-root/
 ```
 
 ---
@@ -309,7 +309,7 @@ tree -L 2 -I 'node_modules|.git'
 │   ├── CONTAINERX_CONTEXT.md
 │   ├── KENYA_COMMERCE_OS_CONTEXT_DUMP.md
 │   └── ...
-└── kenya-commerce-os/
+└── repo-root/
     ├── .gitignore              ← NEW
     ├── .env.example            ← NEW
     ├── SPEC.md
@@ -340,7 +340,7 @@ After cleanup, proceed with Day 1 tasks:
 ### **Task 1: Set Up Supabase Project (30 min)**
 
 ```bash
-cd kenya-commerce-os/packages/database
+cd repo-root/packages/database
 
 # Install dependencies
 npm install
@@ -524,7 +524,7 @@ COMMENT ON CONSTRAINT event_type_locked ON commerce_events IS 'Enforces 6 locked
 ### **Task 3: Test Migration (30 min)**
 
 ```bash
-cd kenya-commerce-os/packages/database
+cd repo-root/packages/database
 
 # Run migration
 npm run migrate
@@ -575,7 +575,7 @@ VALUES ('test-business', '254712345678', 100, 100, 'mpesa', 'TEST123');
 ## ✅ CLEANUP COMPLETION CHECKLIST
 
 ### **Before Starting Day 1:**
-- [ ] Root level cleaned (only archive/, humandocs/, kenya-commerce-os/)
+- [ ] Root level cleaned (only archive/, humandocs/, repo-root/)
 - [ ] Redundant frontend/ deleted
 - [ ] Empty apps/ cleaned (only merchant/ remains)
 - [ ] .gitignore created

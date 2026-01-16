@@ -123,7 +123,7 @@
 - Seed data still pending updates for locked event types.
 
 ### **Completed**
-1. ✅ Root-level cleanup (only archive/, humandocs/, kenya-commerce-os/)
+1. ✅ Root-level cleanup (only repo-root/)
 2. ✅ Kenya Commerce OS cleanup (single merchant app)
 3. ✅ Created .gitignore (proper ignore rules)
 4. ✅ Created .env.example (all required variables)
@@ -159,7 +159,7 @@
 
 ### **Structure Verification**
 ```
-kenya-commerce-os/
+repo-root/
 ├── .gitignore              ✅ NEW
 ├── .env.example            ✅ NEW
 ├── SPEC.md                 🔒 Frozen
