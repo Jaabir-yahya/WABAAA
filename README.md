@@ -173,13 +173,25 @@ repo-root/
 - Offline PWA with real-time sync
 - "Perfect Nairobi Dashboard" (5 screens)
 
-### 📋 Phase 2 (Planned)
+### 📋 Phase 2 (In Progress - 8 Weeks)
+**Timeline**: January 20 - March 17, 2026  
+**Focus**: Deploy to 3-5 merchants, validate product-market fit
+
+- **Weeks 1-2**: Configure APIs, onboard 3 merchants
+- **Week 3**: Build SMS fallback (CRITICAL for Kenya)
+- **Week 4**: Gather feedback, prioritize features
+- **Weeks 5-6**: Build merchant-requested features (bulk processing, debt alerts, voice support)
+- **Weeks 7-8**: Polish and prepare Phase 3
+
+**See**: [PHASE2-ROADMAP.md](PHASE2-ROADMAP.md) for detailed plan
+
+### 📋 Phase 3 (Future)
 - Lending partner integration
 - Insurance partner integration
 - Settlement partner integration
+- Scale to 10-20 merchants
 - Real-time inventory synchronization
 - Multi-channel customer segments
-- Broadcast messaging system
 
 ---
 
@@ -284,6 +296,12 @@ The UI is in Swahili by default. English is a toggle, not the primary language.
 - **[START-HERE.md](START-HERE.md)** - Project overview and quick start
 - **[KAMAU-READY.md](KAMAU-READY.md)** - MVP guide for merchants
 - **[TEST-REPORT.md](TEST-REPORT.md)** - Comprehensive test results (47/47 passed)
+- **[PHASE1-COMPLETE.md](PHASE1-COMPLETE.md)** - Phase 1 completion summary
+
+### 🚀 Phase 2 Documentation
+- **[PHASE2-ROADMAP.md](PHASE2-ROADMAP.md)** - 8-week deployment & validation plan
+- **[PHASE2-MERCHANT-ONBOARDING.md](PHASE2-MERCHANT-ONBOARDING.md)** - Merchant onboarding guide
+- **[TOMORROW-START-HERE.md](TOMORROW-START-HERE.md)** - Next steps for deployment
 
 ### 🏗️ Architecture & Design
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Technical system design + 7 diagrams
