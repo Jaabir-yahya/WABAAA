@@ -48,3 +48,6 @@ workbox-*.js.map
 *.tmp
 tmp/
 temp/
+
+# Local docs
+docs/
