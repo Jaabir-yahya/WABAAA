@@ -30,7 +30,7 @@ export function getSupabaseClient() {
       persistSession: false,
       autoRefreshToken: false,
     },
-  });
+  } as any) as any;
 
-  return cachedClient;
+  return cachedClient as any;
 }

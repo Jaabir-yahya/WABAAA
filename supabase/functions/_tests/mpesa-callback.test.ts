@@ -135,7 +135,7 @@ function buildPayload({
 }
 
 Deno.test("mpesa-callback handles successful payment", async () => {
-  const store = {
+  const store: any = {
     commerce_events: [
       {
         id: "evt-1",
@@ -176,7 +176,7 @@ Deno.test("mpesa-callback handles successful payment", async () => {
   assertEquals(res.status, 200);
   assertEquals(store.payments.length, 1);
 
-  const callbackEvent = store.commerce_events.find((event) =>
+  const callbackEvent = store.commerce_events.find((event: any) =>
     event.event_type === "mpesa_payment_callback"
   );
   assertEquals(callbackEvent?.payload?.result_code, "0");
@@ -184,7 +184,7 @@ Deno.test("mpesa-callback handles successful payment", async () => {
 });
 
 Deno.test("mpesa-callback logs failure without inserting payment", async () => {
-  const store = {
+  const store: any = {
     commerce_events: [
       {
         id: "evt-1",
@@ -225,7 +225,7 @@ Deno.test("mpesa-callback logs failure without inserting payment", async () => {
   assertEquals(res.status, 200);
   assertEquals(store.payments.length, 0);
 
-  const callbackEvent = store.commerce_events.find((event) =>
+  const callbackEvent = store.commerce_events.find((event: any) =>
     event.event_type === "mpesa_payment_callback"
   );
   assertEquals(callbackEvent?.payload?.result_code, "1032");
@@ -233,7 +233,7 @@ Deno.test("mpesa-callback logs failure without inserting payment", async () => {
 });
 
 Deno.test("mpesa-callback ignores duplicate callbacks", async () => {
-  const store = {
+  const store: any = {
     commerce_events: [
       {
         id: "evt-1",
@@ -275,7 +275,7 @@ Deno.test("mpesa-callback ignores duplicate callbacks", async () => {
   assertEquals(res.status, 200);
   assertEquals(store.payments.length, 0);
   assertEquals(
-    store.commerce_events.filter((event) =>
+    store.commerce_events.filter((event: any) =>
       event.event_type === "mpesa_payment_callback"
     ).length,
     0,

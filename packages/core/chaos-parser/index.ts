@@ -243,7 +243,7 @@ export class NairobiChaosParser {
     return {
       confidence,
       data: {
-        amount,
+        amount: amount ?? 0,
         method,
         reference
       }
@@ -270,8 +270,9 @@ export class NairobiChaosParser {
    * Normalize product name (handle aliases, typos)
    */
   private normalizeProduct(product: string): string {
-    const aliases = this.businessConfig.parser_rules?.product_aliases || {};
-    
+    const aliases = (this.businessConfig.parser_rules?.product_aliases ||
+      {}) as Record<string, string[]>;
+
     for (const [canonical, aliasList] of Object.entries(aliases)) {
       if (aliasList.includes(product)) {
         return canonical;
@@ -317,4 +318,3 @@ export function createParser(businessConfig?: any): NairobiChaosParser {
 }
 
 // Export types
-export type { ParsedMessage, OrderItem, ParsedOrder, ParsedPayment };

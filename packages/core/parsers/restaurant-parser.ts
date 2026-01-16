@@ -18,7 +18,7 @@ type RestaurantOrderData = {
 };
 
 export class RestaurantParser extends NairobiChaosParser {
-  parse(text: string): ParsedMessage {
+  override parse(text: string): ParsedMessage {
     const base = super.parse(text);
 
     if (base.type !== "order") {

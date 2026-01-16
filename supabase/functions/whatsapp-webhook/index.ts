@@ -1,7 +1,6 @@
 import { getSupabaseClient } from "../_shared/db.ts";
 import { errorResponse, HttpError, jsonResponse } from "../_shared/errors.ts";
 import { sendWhatsAppMessage } from "../_shared/whatsapp-send.ts";
-import { NairobiChaosParser } from "../_shared/chaos-parser.ts";
 import { getParserForBusiness } from "../../../packages/core/parsers/registry.ts";
 
 export interface WhatsAppMessage {
@@ -351,7 +350,7 @@ export async function processMessage(
   message: WhatsAppMessage,
   context: {
     businessId: string;
-    parser: NairobiChaosParser;
+    parser: { parse: (text: string) => any };
   },
 ) {
   const messageId = message.id;

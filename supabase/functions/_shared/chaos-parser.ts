@@ -216,7 +216,7 @@ export class NairobiChaosParser {
     return {
       confidence,
       data: {
-        amount,
+        amount: amount ?? 0,
         method,
         reference,
       },
