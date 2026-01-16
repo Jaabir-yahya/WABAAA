@@ -65,11 +65,11 @@ Into this:
 
 ### Required Environment Variables
 
-**Merchant App** (`apps/merchant/.env.local`):
+**Merchant Svelte PWA** (`apps/merchant-svelte/.env`):
 ```bash
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-VITE_BUSINESS_ID=elixosense
+PUBLIC_SUPABASE_URL=https://wwjsvzhosbrsotmknrtp.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+PUBLIC_BUSINESS_ID=elixosense
 ```
 
 **Supabase Edge Functions** (project env vars):
@@ -77,24 +77,30 @@ VITE_BUSINESS_ID=elixosense
 MPESA_CONSUMER_KEY=...
 MPESA_CONSUMER_SECRET=...
 MPESA_PASSKEY=...
-MPESA_CALLBACK_URL=https://<project>.functions.supabase.co/mpesa-callback
+MPESA_CALLBACK_URL=https://wwjsvzhosbrsotmknrtp.functions.supabase.co/mpesa-callback
 MPESA_ENVIRONMENT=sandbox
 WHATSAPP_VERIFY_TOKEN=...
 WHATSAPP_APP_SECRET=...
+WHATSAPP_ACCESS_TOKEN=...
 ```
 
 ### Install + Run
 ```bash
 cd /path/to/WABAAA
-cd packages/database && npm install
-cd ../../apps/merchant && npm install
-cd ../../apps/merchant && npm run dev
+cd apps/merchant-svelte && npm install
+npm run dev  # http://localhost:5173
+```
+
+### Build for Production
+```bash
+cd apps/merchant-svelte
+npm run build  # Outputs to build/
+npm run preview  # Test production build locally
 ```
 
 ### Tests
 ```bash
 deno test --no-check supabase/functions/_tests/
-cd apps/merchant && npm test
 ```
 Schema checks are manual for now; see verification queries in
 `packages/database/migrations/0003_create_explicit_orders_payments.sql`.
@@ -114,38 +120,25 @@ See `SPEC.md` for event types and immutability rules.
 ```
 repo-root/
 ├── apps/                      # Frontend applications
-│   ├── admin/                # Admin dashboard (super-admin)
-│   ├── merchant/             # 🌟 Merchant organizer (main PWA)
-│   └── customer/             # Customer catalog (optional)
+│   ├── merchant/             # 🌟 React PWA (legacy, being replaced)
+│   └── merchant-svelte/      # ✨ NEW: Svelte 5 PWA (<100KB, offline-first)
+│
+├── supabase/                  # Backend (Supabase)
+│   ├── functions/            # Edge Functions (Deno)
+│   │   ├── whatsapp-webhook/ # WhatsApp message ingestion
+│   │   ├── mpesa-callback/   # M-Pesa payment callbacks
+│   │   ├── generate-payment-link/ # STK Push trigger
+│   │   └── dev-data/         # Dev-only test data endpoint
+│   └── migrations/           # Database migrations
 │
 ├── packages/                  # Shared libraries
-│   ├── database/             # 🗄️ Supabase schema & migrations
-│   │   ├── migrations/       # SQL migrations (0001, 0002, etc.)
-│   │   ├── seed/             # Test data
-│   │   └── schema/           # Generated TypeScript types
-│   ├── core/                 # 🧠 Business logic
-│   │   ├── chaos-parser/     # NairobiChaosParser
-│   │   └── event-processor/  # Event ingestion & processing
-│   └── integrations/         # 🔌 External APIs
-│       ├── whatsapp/         # Meta WhatsApp Cloud API
-│       ├── mpesa/            # Safaricom Daraja API
-│       └── sms/              # SMS fallback (Africa's Talking)
-│
-├── clients/                   # Tenant configurations
-│   ├── elixosense/           # 🏆 First client
-│   │   ├── config.json       # Business-specific config
-│   │   └── README.md         # Setup instructions
-│   └── template/             # Template for new tenants
-│
-├── archive/                   # Old code (reference only)
-│   ├── containerx-old/       # Previous Python backend
-│   └── elixosense-old/       # Previous Next.js implementation
+│   └── database/             # 🗄️ Schema & types
+│       └── migrations/       # SQL migrations (0001, 0002, 0003)
 │
 └── docs/                      # Documentation
     ├── CONTEXT.md            # 📖 Full project context
     ├── ELIXOSENSE.md         # ElixoSense requirements
-    ├── ROADMAP.md            # Development roadmap
-    └── adr/                  # Architecture Decision Records
+    └── ROADMAP.md            # Development roadmap
 ```
 
 ---
@@ -290,24 +283,28 @@ This is a **solo-dev project** for now, but contributions are welcome!
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | React 18 + Vite + Tailwind CSS + TypeScript |
-| **PWA** | Vite PWA Plugin + Workbox |
+| **Frontend** | Svelte 5 + SvelteKit + TypeScript |
+| **PWA** | Service Worker + IndexedDB (offline-first) |
 | **Backend** | Supabase (PostgreSQL + Auth + Realtime + Edge Functions) |
 | **Database** | PostgreSQL with Row Level Security (RLS) |
 | **Integrations** | Direct APIs (Meta WhatsApp, Safaricom Daraja) |
 | **Hosting** | Vercel (frontend) + Supabase (backend) |
 | **Language** | Swahili-first (Kenya) |
+| **Bundle Size** | <100KB total (optimized for 3G networks) |
 
 ---
 
 ## 🚦 Status
 
-**Current Phase:** Days 0–7 verified (Week 1 complete)
+**Current Phase:** Svelte PWA Foundation Complete
 
 - ✅ Schema + core Edge Functions
 - ✅ WhatsApp ingest + M-Pesa callbacks
-- ✅ Offline-first merchant PWA
-- 📋 Week 2: Daily summary + export + stress tests
+- ✅ Offline-first Svelte 5 PWA (<100KB)
+- ✅ 3-tab merchant dashboard (Orders, Messages, Payments)
+- ✅ Real-time updates via Supabase
+- ✅ Dev test data + dev-data endpoint
+- 📋 Next: WhatsApp auto-responder + deployment
 
 ---
 
@@ -341,24 +338,30 @@ Private project. All rights reserved.
 ## 🔥 Quick Commands Cheat Sheet
 
 ```bash
-# Start everything locally
-cd packages/database && supabase start
-cd apps/merchant && npm run dev
+# Start Svelte PWA locally
+cd apps/merchant-svelte
+npm install
+npm run dev  # http://localhost:5173
 
-# Run migrations
-cd packages/database && npm run migrate
+# Build for production
+cd apps/merchant-svelte
+npm run build
 
-# Generate types
-cd packages/database && npm run types
+# Deploy to Vercel
+cd apps/merchant-svelte
+vercel deploy
 
-# Deploy merchant app
-cd apps/merchant && vercel deploy
+# Test Edge Functions
+deno test --no-check supabase/functions/_tests/
 
-# Test parser
-cd packages/core && npm test
+# Deploy Edge Functions
+supabase functions deploy whatsapp-webhook
+supabase functions deploy mpesa-callback --no-verify-jwt
+supabase functions deploy generate-payment-link
+supabase functions deploy dev-data
 
 # Check database
-cd packages/database && npm run studio
+supabase db remote status
 ```
 
 ---
