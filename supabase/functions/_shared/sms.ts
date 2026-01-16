@@ -177,12 +177,13 @@ export async function sendOrderConfirmationSMS(params: {
   total: number;
   businessId: string;
   orderId?: string;
-}): Promise<void> {
+  metadata?: Record<string, unknown>;
+}): Promise<SmsResult> {
   const message =
     `Asante! Oda yako: ${params.items}\n` +
     `Jumla: KSh ${params.total.toLocaleString("en-KE")}.`;
 
-  await sendSMS({
+  return await sendSMS({
     to: params.customerPhone,
     message,
     businessId: params.businessId,
@@ -190,6 +191,7 @@ export async function sendOrderConfirmationSMS(params: {
     metadata: {
       order_id: params.orderId,
       message_type: "order_confirmation",
+      ...(params.metadata ?? {}),
     },
   });
 }

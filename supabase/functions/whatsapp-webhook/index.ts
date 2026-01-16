@@ -1,6 +1,7 @@
 import { getSupabaseClient } from "../_shared/db.ts";
 import { errorResponse, HttpError, jsonResponse } from "../_shared/errors.ts";
 import { sendWhatsAppMessage } from "../_shared/whatsapp-send.ts";
+import { sendOrderConfirmationSMS, sendSMS } from "../_shared/sms.ts";
 import { getParserForBusiness } from "../../../packages/core/parsers/registry.ts";
 
 export interface WhatsAppMessage {
@@ -107,6 +108,112 @@ function normalizePhone(phone: string) {
   return phone.replace(/[^\d]/g, "");
 }
 
+async function sendWhatsAppSafe(params: { to: string; message: string }) {
+  try {
+    return await sendWhatsAppMessage(params);
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "WhatsApp send failed",
+    };
+  }
+}
+
+async function sendWhatsAppOrSms(params: {
+  to: string;
+  message: string;
+  businessId: string;
+  idempotencyKeyBase?: string;
+  metadata?: Record<string, unknown>;
+}): Promise<{
+  channel: "whatsapp" | "sms";
+  success: boolean;
+  whatsappError?: string;
+  smsError?: string;
+  messageId?: string;
+}> {
+  const whatsapp = await sendWhatsAppSafe({
+    to: params.to,
+    message: params.message,
+  });
+
+  if (whatsapp.success) {
+    return {
+      channel: "whatsapp",
+      success: true,
+      messageId: whatsapp.messageId,
+    };
+  }
+
+  const smsResult = await sendSMS({
+    to: params.to,
+    message: params.message,
+    businessId: params.businessId,
+    idempotencyKey: params.idempotencyKeyBase
+      ? `sms:fallback:${params.idempotencyKeyBase}`
+      : undefined,
+    metadata: {
+      ...(params.metadata ?? {}),
+      channel_used: "sms_fallback",
+      whatsapp_error: whatsapp.error ?? "WhatsApp send failed",
+    },
+  });
+
+  return {
+    channel: "sms",
+    success: smsResult.success,
+    whatsappError: whatsapp.error,
+    smsError: smsResult.error,
+  };
+}
+
+async function sendOrderConfirmationWithFallback(params: {
+  to: string;
+  items: string;
+  total: number;
+  businessId: string;
+  orderId: string;
+  whatsappMessage: string;
+}): Promise<{
+  channel: "whatsapp" | "sms";
+  success: boolean;
+  whatsappError?: string;
+  smsError?: string;
+  messageId?: string;
+}> {
+  const whatsapp = await sendWhatsAppSafe({
+    to: params.to,
+    message: params.whatsappMessage,
+  });
+
+  if (whatsapp.success) {
+    return {
+      channel: "whatsapp",
+      success: true,
+      messageId: whatsapp.messageId,
+    };
+  }
+
+  const smsResult = await sendOrderConfirmationSMS({
+    customerPhone: params.to,
+    items: params.items,
+    total: params.total,
+    businessId: params.businessId,
+    orderId: params.orderId,
+    metadata: {
+      channel_used: "sms_fallback",
+      whatsapp_error: whatsapp.error ?? "WhatsApp send failed",
+    },
+  });
+
+  return {
+    channel: "sms",
+    success: smsResult.success,
+    whatsappError: whatsapp.error,
+    smsError: smsResult.error,
+  };
+}
+
 async function logOutboundMessage(
   supabase: any,
   {
@@ -114,11 +221,17 @@ async function logOutboundMessage(
     messageId,
     customerPhone,
     payload,
+    channel,
+    status,
+    error,
   }: {
     businessId: string;
     messageId: string;
     customerPhone: string;
     payload: Record<string, unknown>;
+    channel: "whatsapp" | "sms";
+    status: "completed" | "failed";
+    error?: string;
   },
 ) {
   await supabase.from("commerce_events").insert({
@@ -127,9 +240,13 @@ async function logOutboundMessage(
     source_channel: "whatsapp",
     source_id: messageId,
     customer_phone: customerPhone,
-    payload,
+    payload: {
+      ...payload,
+      channel_used: channel,
+      send_error: error ?? null,
+    },
     idempotency_key: `whatsapp:out:${messageId}`,
-    processing_status: "completed",
+    processing_status: status,
   });
 }
 
@@ -289,11 +406,12 @@ async function processWhatsAppMessages(payload: WhatsAppWebhookPayload) {
 
   const { data: business } = await supabase
     .from("businesses")
-    .select("business_type,config")
+    .select("business_type,config,name")
     .eq("id", businessId)
     .maybeSingle();
 
   const businessType = business?.business_type ?? "mini_supermarket";
+  const businessName = business?.name ?? "Duka letu";
   const ParserClass = getParserForBusiness(businessType);
   const parserConfig = mergeParserConfig(business?.config);
   const parser = new ParserClass(parserConfig);
@@ -301,6 +419,7 @@ async function processWhatsAppMessages(payload: WhatsAppWebhookPayload) {
   for (const message of messages) {
     await processMessage(supabase, message, {
       businessId,
+      businessName,
       parser,
     });
   }
@@ -350,11 +469,13 @@ export async function processMessage(
   message: WhatsAppMessage,
   context: {
     businessId: string;
+    businessName: string;
     parser: { parse: (text: string) => any };
   },
 ) {
   const messageId = message.id;
   const businessId = context.businessId;
+  const businessName = context.businessName;
   const customerPhone = message.from;
   const messageText = message.text?.body ?? "";
   const policyViolations: string[] = [];
@@ -450,21 +571,31 @@ export async function processMessage(
     const total = calculateTotal(items);
 
     if (total <= 0) {
-      await sendWhatsAppMessage({
+      const reply = await sendWhatsAppOrSms({
         to: normalizedPhone,
         message:
-          "Samahani, sijaelewa bidhaa. Tafadhali taja bidhaa na kiasi, mfano: sukari 2kg.",
-      });
-      lastAutoResponseAt.set(customerPhone, nowMs);
-      await logOutboundMessage(supabase, {
+          "Samahani, sijaelewa oda yako vizuri. " +
+          "Tafadhali taja bidhaa na kiasi, mfano: sukari 2kg, maziwa 1 lita.",
         businessId,
-        messageId,
-        customerPhone,
-        payload: {
+        idempotencyKeyBase: `unrecognized:${messageId}`,
+        metadata: {
           message_type: "order_unrecognized",
-          parsed,
         },
       });
+      lastAutoResponseAt.set(customerPhone, nowMs);
+      if (reply.channel === "whatsapp" && reply.success) {
+        await logOutboundMessage(supabase, {
+          businessId,
+          messageId: reply.messageId ?? messageId,
+          customerPhone,
+          channel: "whatsapp",
+          status: "completed",
+          payload: {
+            message_type: "order_unrecognized",
+            parsed,
+          },
+        });
+      }
       return;
     }
 
@@ -482,20 +613,31 @@ export async function processMessage(
       .single();
 
     if (orderError || !order) {
-      await sendWhatsAppMessage({
+      const reply = await sendWhatsAppOrSms({
         to: normalizedPhone,
-        message: "Samahani, kuna tatizo. Tafadhali jaribu tena baadaye.",
-      });
-      lastAutoResponseAt.set(customerPhone, nowMs);
-      await logOutboundMessage(supabase, {
+        message:
+          `Samahani, ${businessName} tuna tatizo kwa sasa. ` +
+          "Tafadhali jaribu tena baada ya dakika chache.",
         businessId,
-        messageId,
-        customerPhone,
-        payload: {
+        idempotencyKeyBase: `order_failed:${messageId}`,
+        metadata: {
           message_type: "order_failed",
-          error: orderError?.message ?? "Order insert failed",
         },
       });
+      lastAutoResponseAt.set(customerPhone, nowMs);
+      if (reply.channel === "whatsapp" && reply.success) {
+        await logOutboundMessage(supabase, {
+          businessId,
+          messageId: reply.messageId ?? messageId,
+          customerPhone,
+          channel: "whatsapp",
+          status: "completed",
+          payload: {
+            message_type: "order_failed",
+            error: orderError?.message ?? "Order insert failed",
+          },
+        });
+      }
       return;
     }
 
@@ -518,63 +660,93 @@ export async function processMessage(
 
     const paymentOk = paymentResponse.ok;
     const replyMessage = paymentOk
-      ? `Asante! Oda yako: ${orderItems}\nJumla: KSh ${total.toLocaleString()}\nSubiri prompt ya M-Pesa kulipa.`
-      : `Asante! Oda yako: ${orderItems}\nJumla: KSh ${total.toLocaleString()}\nTutakutumia maelezo ya malipo hivi karibuni.`;
+      ? `Asante kwa oda! ${businessName} tumepokea: ${orderItems}\n` +
+        `Jumla: KSh ${total.toLocaleString()}\n` +
+        "Subiri prompt ya M-Pesa ili kulipia."
+      : `Asante kwa oda! ${businessName} tumepokea: ${orderItems}\n` +
+        `Jumla: KSh ${total.toLocaleString()}\n` +
+        "Tutakutumia maelezo ya malipo hivi karibuni.";
 
-    await sendWhatsAppMessage({
+    const reply = await sendOrderConfirmationWithFallback({
       to: normalizedPhone,
-      message: replyMessage,
+      items: orderItems,
+      total,
+      businessId,
+      orderId: order.id,
+      whatsappMessage: replyMessage,
     });
     lastAutoResponseAt.set(customerPhone, nowMs);
-    await logOutboundMessage(supabase, {
-      businessId,
-      messageId,
-      customerPhone,
-      payload: {
-        message_type: "order_confirmation",
-        order_id: order.id,
-        total,
-        items,
-        payment_prompt_sent: paymentOk,
-      },
-    });
+    if (reply.channel === "whatsapp" && reply.success) {
+      await logOutboundMessage(supabase, {
+        businessId,
+        messageId: reply.messageId ?? messageId,
+        customerPhone,
+        channel: "whatsapp",
+        status: "completed",
+        payload: {
+          message_type: "order_confirmation",
+          order_id: order.id,
+          total,
+          items,
+          payment_prompt_sent: paymentOk,
+        },
+      });
+    }
     return;
   }
 
   if (parsed.type === "payment") {
-    await sendWhatsAppMessage({
+    const reply = await sendWhatsAppOrSms({
       to: normalizedPhone,
       message:
-        "Asante! Kama umelipa tayari, tutathibitisha malipo yako hivi karibuni.",
-    });
-    lastAutoResponseAt.set(customerPhone, nowMs);
-    await logOutboundMessage(supabase, {
+        `Asante! ${businessName} tutathibitisha malipo yako na kukujulisha.`,
       businessId,
-      messageId,
-      customerPhone,
-      payload: {
+      idempotencyKeyBase: `payment_ack:${messageId}`,
+      metadata: {
         message_type: "payment_ack",
-        parsed,
       },
     });
+    lastAutoResponseAt.set(customerPhone, nowMs);
+    if (reply.channel === "whatsapp" && reply.success) {
+      await logOutboundMessage(supabase, {
+        businessId,
+        messageId: reply.messageId ?? messageId,
+        customerPhone,
+        channel: "whatsapp",
+        status: "completed",
+        payload: {
+          message_type: "payment_ack",
+          parsed,
+        },
+      });
+    }
     return;
   }
 
-  await sendWhatsAppMessage({
+  const reply = await sendWhatsAppOrSms({
     to: normalizedPhone,
     message:
-      "Karibu! Tuma oda yako kwa mfano: sukari 2kg na maziwa 1 lita.",
-  });
-  lastAutoResponseAt.set(customerPhone, nowMs);
-  await logOutboundMessage(supabase, {
+      `Karibu ${businessName}! Andika oda yako kama: sukari 2kg, maziwa 1 lita.`,
     businessId,
-    messageId,
-    customerPhone,
-    payload: {
+    idempotencyKeyBase: `order_prompt:${messageId}`,
+    metadata: {
       message_type: "order_prompt",
-      parsed,
     },
   });
+  lastAutoResponseAt.set(customerPhone, nowMs);
+  if (reply.channel === "whatsapp" && reply.success) {
+    await logOutboundMessage(supabase, {
+      businessId,
+      messageId: reply.messageId ?? messageId,
+      customerPhone,
+      channel: "whatsapp",
+      status: "completed",
+      payload: {
+        message_type: "order_prompt",
+        parsed,
+      },
+    });
+  }
 }
 
 if (import.meta.main) {
