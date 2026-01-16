@@ -1,5 +1,6 @@
 import { getSupabaseClient } from "../_shared/db.ts";
 import { jsonResponse } from "../_shared/errors.ts";
+import { logQRConversion } from "../_shared/qr-analytics.ts";
 
 // NOTE: Deploy this function with verify_jwt=false because Daraja callbacks
 // are unsigned webhooks and cannot include Supabase JWTs.
@@ -91,6 +92,85 @@ function getMetadataValue(items: CallbackMetadataItem[], name: string) {
   return items.find((item) => item.Name === name)?.Value;
 }
 
+type QRMetadata = {
+  b: string;
+  t?: string;
+  p?: string;
+  q?: number;
+  u?: string;
+  a?: number;
+  o?: string;
+  ts?: number;
+};
+
+function decodeQRMetadata(reference?: string | number | null): QRMetadata | null {
+  if (!reference || typeof reference !== "string") return null;
+  if (!reference.startsWith("KCOS:")) return null;
+  try {
+    const encoded = reference.replace("KCOS:", "");
+    const json = atob(encoded);
+    return JSON.parse(json) as QRMetadata;
+  } catch {
+    return null;
+  }
+}
+
+function getReferenceValue(items: CallbackMetadataItem[]) {
+  return (
+    getMetadataValue(items, "AccountReference") ??
+    getMetadataValue(items, "Reference") ??
+    getMetadataValue(items, "TransactionReference")
+  );
+}
+
+async function createQROrder(params: {
+  supabase: ReturnType<typeof getSupabaseClient>;
+  businessId: string;
+  productId?: string;
+  quantity?: number;
+  unit?: string;
+  amount: number;
+  customerPhone?: string | null;
+  mpesaReceipt: string;
+  qrReference: string;
+}) {
+  const items = params.productId
+    ? [{
+      product: params.productId,
+      quantity: params.quantity ?? 1,
+      unit: params.unit ?? "pcs",
+    }]
+    : [];
+
+  const { data: order, error } = await params.supabase
+    .from("orders")
+    .insert({
+      business_id: params.businessId,
+      customer_phone: params.customerPhone ?? "unknown",
+      total_amount: params.amount,
+      outstanding_amount: 0,
+      items,
+      status: "paid",
+      source: "qr_code",
+      qr_metadata: {
+        product_id: params.productId ?? null,
+        quantity: params.quantity ?? null,
+        unit: params.unit ?? null,
+        amount: params.amount,
+        mpesa_receipt: params.mpesaReceipt,
+      },
+      qr_reference: params.qrReference,
+    })
+    .select("id")
+    .single();
+
+  if (error || !order) {
+    return null;
+  }
+
+  return order.id as string;
+}
+
 export function createMpesaCallbackHandler(
   supabaseFactory: () => ReturnType<typeof getSupabaseClient> = getSupabaseClient,
 ) {
@@ -116,6 +196,12 @@ export function createMpesaCallbackHandler(
     const resultCode = String(stkCallback.ResultCode ?? "");
     const resultDesc = stkCallback.ResultDesc ?? "";
     const metaItems = stkCallback.CallbackMetadata?.Item ?? [];
+    const referenceValue = getReferenceValue(metaItems);
+
+    const amountValue = getMetadataValue(metaItems, "Amount");
+    const receiptValue = getMetadataValue(metaItems, "MpesaReceiptNumber");
+    const phoneValue = getMetadataValue(metaItems, "PhoneNumber");
+    const transactionDate = getMetadataValue(metaItems, "TransactionDate");
 
     const supabase = supabaseFactory();
 
@@ -139,6 +225,59 @@ export function createMpesaCallbackHandler(
       .limit(1)
       .maybeSingle();
 
+    const qrMetadata = decodeQRMetadata(referenceValue);
+
+    if ((stkEventError || !stkEvent) && qrMetadata && resultCode === "0") {
+      const businessId = qrMetadata.b;
+      const amount = typeof amountValue === "number"
+        ? amountValue
+        : Number(amountValue ?? qrMetadata.a ?? 0);
+      const mpesaReceipt = receiptValue ? String(receiptValue) : "";
+      const customerPhone = phoneValue ? String(phoneValue) : null;
+
+      if (businessId && amount > 0 && mpesaReceipt) {
+        const orderId = await createQROrder({
+          supabase,
+          businessId,
+          productId: qrMetadata.p,
+          quantity: qrMetadata.q,
+          unit: qrMetadata.u,
+          amount,
+          customerPhone,
+          mpesaReceipt,
+          qrReference: String(referenceValue),
+        });
+
+        if (orderId) {
+          await supabase.from("payments").insert({
+            business_id: businessId,
+            order_id: orderId,
+            customer_phone: customerPhone,
+            amount,
+            applied_amount: amount,
+            method: "mpesa",
+            mpesa_receipt: mpesaReceipt,
+            mpesa_transaction_id: checkoutRequestId,
+            status: "confirmed",
+          });
+
+          await logQRConversion({
+            businessId,
+            orderId,
+            amount,
+            productId: qrMetadata.p,
+            quantity: qrMetadata.q,
+            metadata: {
+              mpesa_receipt: mpesaReceipt,
+              reference: referenceValue,
+            },
+          });
+        }
+      }
+
+      return jsonResponse({ status: "ok" }, 200, corsHeaders);
+    }
+
     if (stkEventError || !stkEvent) {
       return jsonResponse({ status: "ok" }, 200, corsHeaders);
     }
@@ -151,11 +290,6 @@ export function createMpesaCallbackHandler(
     if (!businessId || !orderId) {
       return jsonResponse({ status: "ok" }, 200, corsHeaders);
     }
-
-    const amountValue = getMetadataValue(metaItems, "Amount");
-    const receiptValue = getMetadataValue(metaItems, "MpesaReceiptNumber");
-    const phoneValue = getMetadataValue(metaItems, "PhoneNumber");
-    const transactionDate = getMetadataValue(metaItems, "TransactionDate");
 
     const amount = typeof amountValue === "number"
       ? amountValue

@@ -33,17 +33,21 @@
 </main>
 
 <nav class="bottom-nav">
-  <a href="/messages" class="nav-item">
-    <span class="icon">📱</span>
-    <span class="label">Ujumbe</span>
+  <a href="/leo" class="nav-item">
+    <span class="icon">📊</span>
+    <span class="label">Leo</span>
   </a>
-  <a href="/" class="nav-item">
+  <a href="/deni" class="nav-item">
+    <span class="icon">⏳</span>
+    <span class="label">Deni</span>
+  </a>
+  <a href="/bidhaa" class="nav-item">
     <span class="icon">📦</span>
-    <span class="label">Oda</span>
+    <span class="label">Bidhaa</span>
   </a>
-  <a href="/payments" class="nav-item">
-    <span class="icon">💰</span>
-    <span class="label">Malipo</span>
+  <a href="/wateja" class="nav-item">
+    <span class="icon">👥</span>
+    <span class="label">Wateja</span>
   </a>
 </nav>
 

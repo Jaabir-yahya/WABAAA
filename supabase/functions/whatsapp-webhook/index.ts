@@ -1,5 +1,8 @@
 import { getSupabaseClient } from "../_shared/db.ts";
 import { errorResponse, HttpError, jsonResponse } from "../_shared/errors.ts";
+import { sendWhatsAppMessage } from "../_shared/whatsapp-send.ts";
+import { NairobiChaosParser } from "../_shared/chaos-parser.ts";
+import { getParserForBusiness } from "../../../packages/core/parsers/registry.ts";
 
 export interface WhatsAppMessage {
   id: string;
@@ -37,6 +40,99 @@ const AUTO_RESPONSE_COOLDOWN_MS = 5 * 60 * 1000;
 
 const customerMessageTimestamps = new Map<string, number[]>();
 const lastAutoResponseAt = new Map<string, number>();
+
+const PRODUCT_PRICES: Record<string, number> = {
+  sukari: 200,
+  maziwa: 80,
+  unga: 180,
+  mafuta: 350,
+  sabuni: 50,
+  dawa: 150,
+};
+
+const PARSER_CONFIG = {
+  parser_rules: {
+    product_aliases: {
+      sukari: ["sugar", "suka", "sucre"],
+      maziwa: ["milk", "mziwa"],
+      unga: ["flour", "uga"],
+      mafuta: ["oil", "cooking oil"],
+      sabuni: ["soap", "sabun"],
+      dawa: ["medicine", "medication"],
+    },
+    unit_mappings: {
+      kg: ["kilo", "kilogram", "kgs"],
+      g: ["gram", "grams"],
+      lita: ["litre", "liter", "litres", "l"],
+      pcs: ["piece", "pieces", "pc"],
+      packet: ["packets", "pkt", "pkts"],
+    },
+  },
+};
+
+function mergeParserConfig(config?: Record<string, unknown>) {
+  const customRules = (config?.parser_rules as Record<string, unknown>) ?? {};
+  const customAliases =
+    (customRules.product_aliases as Record<string, string[]>) ?? {};
+  const customUnits =
+    (customRules.unit_mappings as Record<string, string[]>) ?? {};
+
+  return {
+    parser_rules: {
+      product_aliases: {
+        ...PARSER_CONFIG.parser_rules.product_aliases,
+        ...customAliases,
+      },
+      unit_mappings: {
+        ...PARSER_CONFIG.parser_rules.unit_mappings,
+        ...customUnits,
+      },
+    },
+  };
+}
+
+function calculateTotal(items: { product: string; quantity: number }[]) {
+  return items.reduce((sum, item) => {
+    const unitPrice = PRODUCT_PRICES[item.product] ?? 0;
+    return sum + unitPrice * item.quantity;
+  }, 0);
+}
+
+function formatItems(items: { product: string; quantity: number; unit?: string }[]) {
+  return items
+    .map((item) => `${item.product} ${item.quantity}${item.unit ? ` ${item.unit}` : ""}`)
+    .join(", ");
+}
+
+function normalizePhone(phone: string) {
+  return phone.replace(/[^\d]/g, "");
+}
+
+async function logOutboundMessage(
+  supabase: any,
+  {
+    businessId,
+    messageId,
+    customerPhone,
+    payload,
+  }: {
+    businessId: string;
+    messageId: string;
+    customerPhone: string;
+    payload: Record<string, unknown>;
+  },
+) {
+  await supabase.from("commerce_events").insert({
+    business_id: businessId,
+    event_type: "whatsapp_message_out",
+    source_channel: "whatsapp",
+    source_id: messageId,
+    customer_phone: customerPhone,
+    payload,
+    idempotency_key: `whatsapp:out:${messageId}`,
+    processing_status: "completed",
+  });
+}
 
 function hexToBytes(hex: string) {
   const result = new Uint8Array(hex.length / 2);
@@ -190,21 +286,38 @@ export async function handleWebhookRequest(req: Request) {
 async function processWhatsAppMessages(payload: WhatsAppWebhookPayload) {
   const supabase = getSupabaseClient();
   const messages = extractMessages(payload);
+  const businessId = DEFAULT_BUSINESS_ID;
+
+  const { data: business } = await supabase
+    .from("businesses")
+    .select("business_type,config")
+    .eq("id", businessId)
+    .maybeSingle();
+
+  const businessType = business?.business_type ?? "mini_supermarket";
+  const ParserClass = getParserForBusiness(businessType);
+  const parserConfig = mergeParserConfig(business?.config);
+  const parser = new ParserClass(parserConfig);
 
   for (const message of messages) {
-    await processMessage(supabase, message);
+    await processMessage(supabase, message, {
+      businessId,
+      parser,
+    });
   }
 }
 
 async function logPolicyViolation(
   supabase: any,
   {
+    businessId,
     messageId,
     customerPhone,
     reason,
     occurredAt,
     details,
   }: {
+    businessId: string;
     messageId: string;
     customerPhone: string;
     reason: string;
@@ -213,7 +326,7 @@ async function logPolicyViolation(
   },
 ) {
   const { error } = await supabase.from("commerce_events").insert({
-    business_id: DEFAULT_BUSINESS_ID,
+    business_id: businessId,
     event_type: "merchant_note",
     source_channel: "whatsapp",
     source_id: messageId,
@@ -236,8 +349,13 @@ async function logPolicyViolation(
 export async function processMessage(
   supabase: any,
   message: WhatsAppMessage,
+  context: {
+    businessId: string;
+    parser: NairobiChaosParser;
+  },
 ) {
   const messageId = message.id;
+  const businessId = context.businessId;
   const customerPhone = message.from;
   const messageText = message.text?.body ?? "";
   const policyViolations: string[] = [];
@@ -278,6 +396,7 @@ export async function processMessage(
 
   for (const violation of policyViolations) {
     await logPolicyViolation(supabase, {
+      businessId,
       messageId,
       customerPhone,
       reason: violation,
@@ -292,7 +411,7 @@ export async function processMessage(
   const { error: insertError } = await supabase
     .from("commerce_events")
     .insert({
-      business_id: DEFAULT_BUSINESS_ID,
+      business_id: businessId,
       event_type: "whatsapp_message_in",
       source_channel: "whatsapp",
       source_id: messageId,
@@ -315,6 +434,148 @@ export async function processMessage(
   if (insertError) {
     throw new Error(insertError.message);
   }
+
+  if (!autoResponseAllowed || !ALLOWED_MESSAGE_TYPES.has(message.type)) {
+    return;
+  }
+
+  const parsed = context.parser.parse(messageText);
+  const normalizedPhone = normalizePhone(customerPhone);
+
+  if (parsed.type === "order" && parsed.data?.items?.length) {
+    const items = parsed.data.items as Array<{
+      product: string;
+      quantity: number;
+      unit?: string;
+    }>;
+    const total = calculateTotal(items);
+
+    if (total <= 0) {
+      await sendWhatsAppMessage({
+        to: normalizedPhone,
+        message:
+          "Samahani, sijaelewa bidhaa. Tafadhali taja bidhaa na kiasi, mfano: sukari 2kg.",
+      });
+      lastAutoResponseAt.set(customerPhone, nowMs);
+      await logOutboundMessage(supabase, {
+        businessId,
+        messageId,
+        customerPhone,
+        payload: {
+          message_type: "order_unrecognized",
+          parsed,
+        },
+      });
+      return;
+    }
+
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .insert({
+        business_id: businessId,
+        customer_phone: customerPhone,
+        total_amount: total,
+        outstanding_amount: total,
+        items,
+        status: "pending",
+      })
+      .select("id")
+      .single();
+
+    if (orderError || !order) {
+      await sendWhatsAppMessage({
+        to: normalizedPhone,
+        message: "Samahani, kuna tatizo. Tafadhali jaribu tena baadaye.",
+      });
+      lastAutoResponseAt.set(customerPhone, nowMs);
+      await logOutboundMessage(supabase, {
+        businessId,
+        messageId,
+        customerPhone,
+        payload: {
+          message_type: "order_failed",
+          error: orderError?.message ?? "Order insert failed",
+        },
+      });
+      return;
+    }
+
+    const orderItems = formatItems(items);
+
+    const paymentResponse = await fetch(
+      `${Deno.env.get("SUPABASE_URL")}/functions/v1/generate-payment-link`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY") ?? ""}`,
+        },
+        body: JSON.stringify({
+          business_id: businessId,
+          order_id: order.id,
+        }),
+      },
+    );
+
+    const paymentOk = paymentResponse.ok;
+    const replyMessage = paymentOk
+      ? `Asante! Oda yako: ${orderItems}\nJumla: KSh ${total.toLocaleString()}\nSubiri prompt ya M-Pesa kulipa.`
+      : `Asante! Oda yako: ${orderItems}\nJumla: KSh ${total.toLocaleString()}\nTutakutumia maelezo ya malipo hivi karibuni.`;
+
+    await sendWhatsAppMessage({
+      to: normalizedPhone,
+      message: replyMessage,
+    });
+    lastAutoResponseAt.set(customerPhone, nowMs);
+    await logOutboundMessage(supabase, {
+      businessId,
+      messageId,
+      customerPhone,
+      payload: {
+        message_type: "order_confirmation",
+        order_id: order.id,
+        total,
+        items,
+        payment_prompt_sent: paymentOk,
+      },
+    });
+    return;
+  }
+
+  if (parsed.type === "payment") {
+    await sendWhatsAppMessage({
+      to: normalizedPhone,
+      message:
+        "Asante! Kama umelipa tayari, tutathibitisha malipo yako hivi karibuni.",
+    });
+    lastAutoResponseAt.set(customerPhone, nowMs);
+    await logOutboundMessage(supabase, {
+      businessId,
+      messageId,
+      customerPhone,
+      payload: {
+        message_type: "payment_ack",
+        parsed,
+      },
+    });
+    return;
+  }
+
+  await sendWhatsAppMessage({
+    to: normalizedPhone,
+    message:
+      "Karibu! Tuma oda yako kwa mfano: sukari 2kg na maziwa 1 lita.",
+  });
+  lastAutoResponseAt.set(customerPhone, nowMs);
+  await logOutboundMessage(supabase, {
+    businessId,
+    messageId,
+    customerPhone,
+    payload: {
+      message_type: "order_prompt",
+      parsed,
+    },
+  });
 }
 
 if (import.meta.main) {
