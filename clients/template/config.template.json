@@ -1,0 +1,74 @@
+{
+  "business_id": "your-business-slug",
+  "business_name": "Your Business Name",
+  "owner": {
+    "name": "Owner Full Name",
+    "phone": "+254XXXXXXXXX",
+    "email": "owner@yourbusiness.com"
+  },
+  "contact": {
+    "whatsapp_number": "+254XXXXXXXXX",
+    "sms_number": "+254XXXXXXXXX",
+    "business_hours": {
+      "monday": { "open": "08:00", "close": "18:00" },
+      "tuesday": { "open": "08:00", "close": "18:00" },
+      "wednesday": { "open": "08:00", "close": "18:00" },
+      "thursday": { "open": "08:00", "close": "18:00" },
+      "friday": { "open": "08:00", "close": "18:00" },
+      "saturday": { "open": "09:00", "close": "14:00" },
+      "sunday": { "closed": true }
+    }
+  },
+  "payment": {
+    "mpesa": {
+      "shortcode": "YOUR_SHORTCODE",
+      "paybill": "YOUR_PAYBILL",
+      "till_number": "YOUR_TILL"
+    },
+    "methods_accepted": ["mpesa", "bank_transfer", "cash"]
+  },
+  "localization": {
+    "default_language": "sw",
+    "supported_languages": ["sw", "en"],
+    "timezone": "Africa/Nairobi",
+    "currency": "KES"
+  },
+  "parser_rules": {
+    "product_aliases": {},
+    "unit_mappings": {
+      "kg": ["kilo", "kilogram", "kgs"],
+      "g": ["gram", "grams"],
+      "lita": ["litre", "liter", "litres", "l"],
+      "pcs": ["piece", "pieces", "pc"],
+      "packet": ["packets", "pkt", "pkts"]
+    }
+  },
+  "auto_responses": {
+    "greeting": {
+      "sw": "Karibu! Tutakusaidia haraka.",
+      "en": "Welcome! We'll assist you quickly."
+    },
+    "payment_request": {
+      "sw": "Tafadhali lipa KES {amount} kwa M-Pesa till {till_number}.",
+      "en": "Please pay KES {amount} via M-Pesa till {till_number}."
+    },
+    "payment_confirmed": {
+      "sw": "Ahsante! Malipo yamepokelewa.",
+      "en": "Thank you! Payment received."
+    },
+    "order_fulfilled": {
+      "sw": "Oda yako iko tayari! Asante.",
+      "en": "Your order is ready! Thank you."
+    }
+  },
+  "features": {
+    "auto_parse_orders": true,
+    "auto_link_payments": true,
+    "send_receipts": true,
+    "send_delivery_updates": true
+  },
+  "notifications": {
+    "low_inventory_threshold": 5,
+    "daily_summary_time": "18:00"
+  }
+}

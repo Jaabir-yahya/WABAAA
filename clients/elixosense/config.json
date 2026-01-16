@@ -1,0 +1,97 @@
+{
+  "business_id": "elixosense",
+  "business_name": "ElixoSense Kenya",
+  "owner": {
+    "name": "UPDATE_ME",
+    "phone": "+254XXXXXXXXX",
+    "email": "owner@elixosense.co.ke"
+  },
+  "contact": {
+    "whatsapp_number": "+254XXXXXXXXX",
+    "sms_number": "+254XXXXXXXXX",
+    "business_hours": {
+      "monday": { "open": "08:00", "close": "18:00" },
+      "tuesday": { "open": "08:00", "close": "18:00" },
+      "wednesday": { "open": "08:00", "close": "18:00" },
+      "thursday": { "open": "08:00", "close": "18:00" },
+      "friday": { "open": "08:00", "close": "18:00" },
+      "saturday": { "open": "09:00", "close": "14:00" },
+      "sunday": { "closed": true }
+    }
+  },
+  "payment": {
+    "mpesa": {
+      "shortcode": "UPDATE_ME",
+      "paybill": "UPDATE_ME",
+      "till_number": "UPDATE_ME"
+    },
+    "methods_accepted": ["mpesa", "bank_transfer", "cash"]
+  },
+  "localization": {
+    "default_language": "sw",
+    "supported_languages": ["sw", "en"],
+    "timezone": "Africa/Nairobi",
+    "currency": "KES"
+  },
+  "parser_rules": {
+    "product_aliases": {
+      "sukari": ["sugar", "suka", "sucre"],
+      "maziwa": ["milk", "mziwa"],
+      "unga": ["flour", "uga"],
+      "mafuta": ["oil", "cooking oil"],
+      "sabuni": ["soap", "sabun"],
+      "dawa": ["medicine", "medication"]
+    },
+    "unit_mappings": {
+      "kg": ["kilo", "kilogram", "kgs"],
+      "g": ["gram", "grams"],
+      "lita": ["litre", "liter", "litres", "l"],
+      "pcs": ["piece", "pieces", "pc"],
+      "packet": ["packets", "pkt", "pkts"]
+    }
+  },
+  "auto_responses": {
+    "greeting": {
+      "sw": "Karibu ElixoSense! Tutakusaidia haraka. 🙂",
+      "en": "Welcome to ElixoSense! We'll assist you quickly. 🙂"
+    },
+    "payment_request": {
+      "sw": "Asante! Tafadhali lipa KES {amount} kwa M-Pesa till {till_number}. Tumia namba {order_id} kama reference.",
+      "en": "Thank you! Please pay KES {amount} via M-Pesa till {till_number}. Use {order_id} as reference."
+    },
+    "payment_confirmed": {
+      "sw": "Ahsante! Malipo yamepokelewa. Oda yako inachakatwa.",
+      "en": "Thank you! Payment received. Your order is being processed."
+    },
+    "order_fulfilled": {
+      "sw": "Oda yako iko tayari! Asante kwa kufanya biashara nasi. 🎉",
+      "en": "Your order is ready! Thank you for doing business with us. 🎉"
+    },
+    "order_out_for_delivery": {
+      "sw": "Oda yako iko njiani. Tutakufikia hivi karibuni!",
+      "en": "Your order is on the way. We'll reach you shortly!"
+    }
+  },
+  "features": {
+    "auto_parse_orders": true,
+    "auto_link_payments": true,
+    "send_receipts": true,
+    "send_delivery_updates": true,
+    "catalog_sharing": false,
+    "inventory_sync": false
+  },
+  "notifications": {
+    "low_inventory_threshold": 5,
+    "daily_summary_time": "18:00",
+    "notify_on_payment": true,
+    "notify_on_order": true
+  },
+  "integrations": {
+    "ecommerce_website": {
+      "enabled": false,
+      "url": "https://elixosense.co.ke",
+      "webhook_url": null,
+      "api_key": null
+    }
+  }
+}

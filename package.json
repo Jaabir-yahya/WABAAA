@@ -1,0 +1,36 @@
+{
+  "name": "kenya-commerce-os",
+  "version": "0.1.0",
+  "description": "Turning WhatsApp + M-Pesa chaos into organized commerce for Kenyan merchants",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:merchant": "cd apps/merchant && npm run dev",
+    "build:merchant": "cd apps/merchant && npm run build",
+    "dev:database": "cd packages/database && supabase start",
+    "migrate": "cd packages/database && npm run migrate",
+    "types": "cd packages/database && npm run types",
+    "seed": "cd packages/database && npm run seed",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "keywords": [
+    "kenya",
+    "commerce",
+    "whatsapp",
+    "mpesa",
+    "swahili"
+  ],
+  "author": "Solo Dev",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

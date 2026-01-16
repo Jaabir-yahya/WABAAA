@@ -1,0 +1,22 @@
+{
+  "name": "@kenya-commerce-os/database",
+  "version": "0.1.0",
+  "description": "Database schema, migrations, and types for Kenya Commerce OS",
+  "private": true,
+  "scripts": {
+    "migrate": "supabase db push",
+    "migrate:new": "supabase migration new",
+    "migrate:list": "supabase migration list",
+    "reset": "supabase db reset",
+    "seed": "supabase db seed",
+    "types": "supabase gen types typescript --local > schema/types.ts",
+    "studio": "supabase studio"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "supabase": "^1.142.2",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.npm-cache/
+
+# Testing
+coverage/
+*.log
+
+# Production
+dist/
+build/
+.vercel/
+.output/
+.next/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Supabase
+.supabase/
+supabase/.temp/
+
+# TypeScript
+*.tsbuildinfo
+
+# PWA
+sw.js
+sw.js.map
+workbox-*.js
+workbox-*.js.map
+
+# Temporary files
+*.tmp
+tmp/
+temp/
