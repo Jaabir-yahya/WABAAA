@@ -20,16 +20,22 @@ steps:
       phone: "{{ trigger.from }}"
     output: customer
 
+  - id: resolve_items
+    action: catalog.resolve_items
+    input:
+      items: "{{ parsed.data.items }}"
+    output: resolved
+
   - id: check_inventory
     action: inventory.check
     input:
-      items: "{{ parsed.data.items }}"
+      items: "{{ resolved.items }}"
     output: inventory
 
   - id: price_order
     action: price.calculate
     input:
-      items: "{{ parsed.data.items }}"
+      items: "{{ resolved.items }}"
       taxRate: 0.16
       currency: KES
     output: pricing

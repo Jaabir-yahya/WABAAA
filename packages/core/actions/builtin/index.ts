@@ -26,6 +26,11 @@ import { complianceLogAction } from './compliance-log';
 import { inventoryReserveAction } from './inventory-reserve';
 import { inventoryReleaseAction } from './inventory-release';
 import { customerAddPointsAction } from './customer-add-points';
+import { productCreateAction } from './product-create';
+import { productUpdateAction } from './product-update';
+import { catalogSearchAction } from './catalog-search';
+import { catalogBrowseAction } from './catalog-browse';
+import { catalogResolveItemsAction } from './catalog-resolve-items';
 
 // Kenya-specific actions
 import { whatsappSendAction } from './whatsapp-send';
@@ -54,6 +59,11 @@ export { complianceLogAction } from './compliance-log';
 export { inventoryReserveAction } from './inventory-reserve';
 export { inventoryReleaseAction } from './inventory-release';
 export { customerAddPointsAction } from './customer-add-points';
+export { productCreateAction } from './product-create';
+export { productUpdateAction } from './product-update';
+export { catalogSearchAction } from './catalog-search';
+export { catalogBrowseAction } from './catalog-browse';
+export { catalogResolveItemsAction } from './catalog-resolve-items';
 
 // Kenya-specific actions
 export { whatsappSendAction } from './whatsapp-send';
@@ -86,6 +96,11 @@ export const builtinActions: Action[] = [
   inventoryReserveAction,
   inventoryReleaseAction,
   customerAddPointsAction,
+  productCreateAction,
+  productUpdateAction,
+  catalogSearchAction,
+  catalogBrowseAction,
+  catalogResolveItemsAction,
   // Kenya-specific
   whatsappSendAction,
   mpesaInitiateAction,

@@ -14,6 +14,7 @@ export type ActionCategory =
   | 'payment'        // mpesa, payment
   | 'identity'       // actor
   | 'data'           // order, event
+  | 'catalog'        // product, catalog
   | 'document'       // document, receipt, image
   | 'inventory'      // stock, catalog
   | 'integration'    // webhook, erp, api
