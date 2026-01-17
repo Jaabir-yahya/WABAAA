@@ -1,0 +1,99 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                    KENYA COMMERCE OS - UML DIAGRAMS                            ║
+║                         Created: January 16, 2026                              ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+📊 TOTAL FILES: 16
+   ├── 13 UML Diagrams (.puml format)
+   └── 3 Documentation files (.md format)
+
+📁 DIAGRAM BREAKDOWN:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ USE CASE DIAGRAMS (1)                                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 01-use-case-diagram.puml           All actors and system interactions       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ SEQUENCE DIAGRAMS (5) - Real Kenya Flows                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 02-sequence-whatsapp-order.puml    Customer orders via WhatsApp (Swahili)  │
+│ 03-sequence-mpesa-payment.puml     M-Pesa STK Push payment flow            │
+│ 04-sequence-offline-sync.puml      Offline-first operation and sync        │
+│ 05-sequence-payment-linking.puml   Auto-matching payments to orders        │
+│ 06-sequence-merchant-correction... Merchant manual corrections (SPEC)      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CLASS DIAGRAMS (1)                                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 07-class-diagram-schema.puml       Complete database schema with relations │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ COMPONENT DIAGRAMS (2)                                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 08-component-architecture.puml     High-level system architecture          │
+│ 09-component-integrations.puml     WhatsApp, M-Pesa, SMS integrations      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STATE DIAGRAMS (2)                                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 10-state-order.puml                Order lifecycle state machine           │
+│ 11-state-payment.puml              Payment status state machine            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ACTIVITY DIAGRAMS (2)                                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 12-activity-order-fulfillment.puml Complete order-to-fulfillment flow      │
+│ 13-activity-event-processing.puml  Event-driven architecture workflow      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ DOCUMENTATION (3)                                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 00-README.md                        Main UML documentation                 │
+│ QUICK-START.md                      Viewing and exporting guide            │
+│ DIAGRAM-INDEX.md                    Comprehensive index and reference      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🇰🇪 KENYA-SPECIFIC COVERAGE:
+   ✅ WhatsApp commerce (Swahili parsing)
+   ✅ M-Pesa STK Push integration
+   ✅ Offline-first architecture
+   ✅ Flexible payment terms
+   ✅ Multi-tenant isolation
+
+🎯 QUICK START:
+   1. cd kenya-commerce-os/docs/uml
+   2. Install VS Code PlantUML extension
+   3. Open any .puml file
+   4. Press Alt+D to preview
+
+📤 EXPORT AS IMAGES:
+   brew install plantuml
+   plantuml -tpng *.puml
+
+🌐 VIEW ONLINE:
+   http://www.plantuml.com/plantuml/uml/
+   (copy-paste .puml content)
+
+✅ SPEC COMPLIANT:
+   ✓ 4 core tables mapped
+   ✓ 6 locked event types documented
+   ✓ Merchant corrections shown
+   ✓ Idempotency illustrated
+   ✓ Multi-tenant design captured
+
+📚 NEXT STEPS:
+   → View diagrams (start with 01, 08, 02)
+   → Export as PNG for documentation
+   → Reference during implementation
+   → Update when architecture changes
+
+═══════════════════════════════════════════════════════════════════════════════
+                    Built with ❤️ for Kenya Commerce OS
+═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,40 @@
+id: elixosense-order
+name: ElixoSense Order Flow
+description: Basic order-to-payment workflow triggered via HTTP
+version: "1.0"
+
+trigger:
+  type: http.request
+
+steps:
+  - id: resolve_customer
+    action: actor.resolve
+    input:
+      phone: "{{ trigger.customerPhone }}"
+    output: customer
+
+  - id: create_order
+    action: order.create
+    input:
+      customerPhone: "{{ trigger.customerPhone }}"
+      customerName: "{{ trigger.customerName }}"
+      items: "{{ trigger.items }}"
+      totalAmount: "{{ trigger.totalAmount }}"
+      isCredit: "{{ trigger.isCredit }}"
+      paymentTerms: "{{ trigger.paymentTerms }}"
+      deliveryAddress: "{{ trigger.deliveryAddress }}"
+    output: order
+
+  - id: request_payment
+    action: mpesa.initiate
+    input:
+      phone: "{{ trigger.customerPhone }}"
+      amount: "{{ order.totalAmount }}"
+      reference: "{{ order.id }}"
+      description: "Order {{ order.id }}"
+
+  - id: confirm
+    action: whatsapp.send
+    input:
+      to: "{{ trigger.customerPhone }}"
+      message: "Order {{ order.id }} created! Total: KSh {{ order.totalAmount }}"

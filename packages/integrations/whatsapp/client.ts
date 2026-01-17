@@ -251,6 +251,3 @@ export class WhatsAppClient {
 export function createWhatsAppClient(config: WhatsAppConfig): WhatsAppClient {
   return new WhatsAppClient(config);
 }
-
-// Export types
-export type { WhatsAppConfig, SendMessageParams, WhatsAppMessage };

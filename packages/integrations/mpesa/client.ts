@@ -263,6 +263,3 @@ export class MPesaClient {
 export function createMPesaClient(config: MPesaConfig): MPesaClient {
   return new MPesaClient(config);
 }
-
-// Export types
-export type { MPesaConfig, STKPushParams, STKPushResponse, MPesaCallback };

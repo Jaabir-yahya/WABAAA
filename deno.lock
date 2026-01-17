@@ -102,6 +102,47 @@
           ]
         }
       },
+      "apps/merchant-svelte": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@supabase/supabase-js@^2.90.1",
+            "npm:@sveltejs/adapter-auto@7",
+            "npm:@sveltejs/adapter-static@^3.0.10",
+            "npm:@sveltejs/kit@^2.49.1",
+            "npm:@sveltejs/vite-plugin-svelte@^6.2.1",
+            "npm:idb@^8.0.3",
+            "npm:svelte-check@^4.3.4",
+            "npm:svelte@^5.45.6",
+            "npm:typescript@^5.9.3",
+            "npm:vite@^7.2.6"
+          ]
+        }
+      },
+      "apps/storefront-svelte": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@supabase/supabase-js@^2.90.1",
+            "npm:@sveltejs/adapter-static@^3.0.10",
+            "npm:@sveltejs/kit@^2.49.1",
+            "npm:@sveltejs/vite-plugin-svelte@^6.2.1",
+            "npm:svelte-check@^4.3.4",
+            "npm:svelte@^5.45.6",
+            "npm:typescript@^5.9.3",
+            "npm:vite@^7.2.6"
+          ]
+        }
+      },
+      "packages/api": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@types/express@^4.17.21",
+            "npm:@types/node@^20.11.0",
+            "npm:express@^4.19.2",
+            "npm:ts-node@^10.9.2",
+            "npm:typescript@^5.3.3"
+          ]
+        }
+      },
       "packages/core": {
         "packageJson": {
           "dependencies": [
@@ -109,7 +150,10 @@
             "npm:@types/jest@^29.5.11",
             "npm:@types/node@^20.11.0",
             "npm:jest@^29.7.0",
-            "npm:typescript@^5.3.3"
+            "npm:jsonata@^2.0.5",
+            "npm:ts-jest@^29.1.2",
+            "npm:typescript@^5.3.3",
+            "npm:yaml@^2.4.2"
           ]
         }
       },

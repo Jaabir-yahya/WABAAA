@@ -52,5 +52,5 @@ workbox-*.js.map
 tmp/
 temp/
 
-# Local docs
-docs/
+# Generated API docs (if any)
+# docs/api/

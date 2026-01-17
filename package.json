@@ -8,6 +8,7 @@
     "apps/*"
   ],
   "scripts": {
+    "dev:api": "cd packages/api && npm run dev",
     "dev:merchant": "cd apps/merchant && npm run dev",
     "dev:storefront": "cd apps/storefront-svelte && npm run dev",
     "build:merchant": "cd apps/merchant && npm run build",
@@ -17,7 +18,8 @@
     "types": "cd packages/database && npm run types",
     "seed": "cd packages/database && npm run seed",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "npm run lint --workspaces --if-present",
+    "test:core": "cd packages/core && npm test"
   },
   "keywords": [
     "kenya",
