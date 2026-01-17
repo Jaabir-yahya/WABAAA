@@ -18,6 +18,14 @@ import { eventLogAction } from './event-log';
 import { conditionIfAction } from './condition-if';
 import { dataTransformAction } from './data-transform';
 import { httpRequestAction } from './http-request';
+import { documentParseAction } from './document-parse';
+import { inventoryCheckAction } from './inventory-check';
+import { priceCalculateAction } from './price-calculate';
+import { customerSegmentAction } from './customer-segment';
+import { complianceLogAction } from './compliance-log';
+import { inventoryReserveAction } from './inventory-reserve';
+import { inventoryReleaseAction } from './inventory-release';
+import { customerAddPointsAction } from './customer-add-points';
 
 // Kenya-specific actions
 import { whatsappSendAction } from './whatsapp-send';
@@ -38,6 +46,14 @@ export { eventLogAction } from './event-log';
 export { conditionIfAction } from './condition-if';
 export { dataTransformAction } from './data-transform';
 export { httpRequestAction } from './http-request';
+export { documentParseAction } from './document-parse';
+export { inventoryCheckAction } from './inventory-check';
+export { priceCalculateAction } from './price-calculate';
+export { customerSegmentAction } from './customer-segment';
+export { complianceLogAction } from './compliance-log';
+export { inventoryReserveAction } from './inventory-reserve';
+export { inventoryReleaseAction } from './inventory-release';
+export { customerAddPointsAction } from './customer-add-points';
 
 // Kenya-specific actions
 export { whatsappSendAction } from './whatsapp-send';
@@ -62,6 +78,14 @@ export const builtinActions: Action[] = [
   conditionIfAction,
   dataTransformAction,
   httpRequestAction,
+  documentParseAction,
+  inventoryCheckAction,
+  priceCalculateAction,
+  customerSegmentAction,
+  complianceLogAction,
+  inventoryReserveAction,
+  inventoryReleaseAction,
+  customerAddPointsAction,
   // Kenya-specific
   whatsappSendAction,
   mpesaInitiateAction,

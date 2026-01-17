@@ -1,0 +1,71 @@
+id: elixosense.whatsapp_storefront
+name: Elixosense WhatsApp Storefront
+description: WhatsApp order intake → quote → payment → confirmation
+version: "1.0"
+
+trigger:
+  type: whatsapp.received
+
+steps:
+  - id: parse_order
+    action: document.parse
+    input:
+      text: "{{ trigger.text }}"
+      confidenceThreshold: 0.6
+    output: parsed
+
+  - id: resolve_customer
+    action: actor.resolve
+    input:
+      phone: "{{ trigger.from }}"
+    output: customer
+
+  - id: check_inventory
+    action: inventory.check
+    input:
+      items: "{{ parsed.data.items }}"
+    output: inventory
+
+  - id: price_order
+    action: price.calculate
+    input:
+      items: "{{ parsed.data.items }}"
+      taxRate: 0.16
+      currency: KES
+    output: pricing
+
+  - id: send_quote
+    action: whatsapp.send
+    input:
+      to: "{{ trigger.from }}"
+      message: |
+        Asante {{ customer.phone }}!
+        Oda yako: {{ parsed.data.items }}
+        Jumla: KSh {{ pricing.total }}
+        Reply PAY to complete your order.
+
+  - id: request_payment
+    action: mpesa.initiate
+    input:
+      phone: "{{ trigger.from }}"
+      amount: "{{ pricing.total }}"
+      reference: "{{ trigger.from }}"
+      description: "Elixosense Order"
+    output: payment
+
+  - id: create_order
+    action: order.create
+    input:
+      customerPhone: "{{ trigger.from }}"
+      items: "{{ parsed.data.items }}"
+      totalAmount: "{{ pricing.total }}"
+    output: order
+
+  - id: confirm_order
+    action: whatsapp.send
+    input:
+      to: "{{ trigger.from }}"
+      message: |
+        Order confirmed ✅
+        Order ID: {{ order.id }}
+        Total: KSh {{ order.totalAmount }}

@@ -15,6 +15,7 @@ export type ActionCategory =
   | 'identity'       // actor
   | 'data'           // order, event
   | 'document'       // document, receipt, image
+  | 'inventory'      // stock, catalog
   | 'integration'    // webhook, erp, api
   | 'qr'             // qr
   | 'control'        // condition, parallel, wait, loop

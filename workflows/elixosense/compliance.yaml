@@ -1,0 +1,39 @@
+id: elixosense.health_product_compliance
+name: Elixosense Health Product Compliance
+description: Verify health product requests and log compliance events
+version: "1.0"
+
+trigger:
+  type: whatsapp.received
+
+steps:
+  - id: parse_request
+    action: document.parse
+    input:
+      text: "{{ trigger.text }}"
+      confidenceThreshold: 0.6
+    output: parsed
+
+  - id: check_inventory
+    action: inventory.check
+    input:
+      items: "{{ parsed.data.items }}"
+    output: inventory
+
+  - id: log_compliance
+    action: compliance.log
+    input:
+      eventType: product.compliance.checked
+      customerPhone: "{{ trigger.from }}"
+      payload:
+        parsed: "{{ parsed }}"
+        inventory: "{{ inventory }}"
+
+  - id: send_result
+    action: whatsapp.send
+    input:
+      to: "{{ trigger.from }}"
+      message: |
+        Tulipokea ombi lako la bidhaa.
+        Status: {{ inventory.allAvailable }}
+        Tutaendelea kukuhudumia.

@@ -1,0 +1,40 @@
+id: elixosense.cart_recovery
+name: Elixosense Abandoned Cart Recovery
+description: Scheduled recovery reminders for abandoned carts
+version: "1.0"
+
+trigger:
+  type: schedule.cron
+  schedule: "0 10 * * *" # Daily at 10:00
+
+steps:
+  - id: fetch_abandoned_carts
+    action: http.request
+    input:
+      url: "{{ trigger.cartsEndpoint }}"
+      method: GET
+    output: cartsResponse
+
+  - id: build_recovery_message
+    action: data.transform
+    input:
+      mapping:
+        to: "{{ trigger.customerPhone }}"
+        message: |
+          Hujamaliza oda yako. 
+          Tafadhali lipa sasa ili tukutumie bidhaa zako.
+    output: recovery
+
+  - id: send_recovery_message
+    action: whatsapp.send
+    input:
+      to: "{{ recovery.to }}"
+      message: "{{ recovery.message }}"
+
+  - id: log_recovery
+    action: event.log
+    input:
+      eventType: cart.recovery.sent
+      eventData:
+        trigger: "{{ trigger }}"
+        response: "{{ cartsResponse }}"

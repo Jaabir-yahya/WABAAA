@@ -281,7 +281,7 @@ describe('Built-in Actions', () => {
 
 describe('Built-in Actions Collection', () => {
   test('should have correct number of actions', () => {
-    expect(builtinActions.length).toBe(12); // 5 core + 7 Kenya-specific
+    expect(builtinActions.length).toBe(20); // 13 core + 7 Kenya-specific
   });
   
   test('all actions should have valid IDs', () => {
