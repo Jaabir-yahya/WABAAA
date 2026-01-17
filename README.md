@@ -335,6 +335,11 @@ The UI is in Swahili by default. English is a toggle, not the primary language.
 - **[QUICK-START.md](QUICK-START.md)** - Fast path to production
 - **[VERIFY-SETUP.md](VERIFY-SETUP.md)** - Webhook verification & testing
 
+### 🧪 Testing & Quality
+- **[TESTING-QUICK-START.md](TESTING-QUICK-START.md)** - ⭐ Quick reference for testing (3 options: 30min/3hr/8hr)
+- **[CAPABILITY-TEST-PLAN.md](CAPABILITY-TEST-PLAN.md)** - Comprehensive test plan (50 focused tests)
+- **[TEST-REPORT.md](TEST-REPORT.md)** - Current test status (47/47 passing ✅)
+
 ---
 
 ## 🤝 Contributing
