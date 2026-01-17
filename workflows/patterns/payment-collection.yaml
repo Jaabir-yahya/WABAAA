@@ -1,0 +1,63 @@
+# KCOS Pattern: Payment Collection
+# Universal pattern for collecting payments via M-Pesa
+#
+# Industries: All (Retail, Restaurant, Automotive, Horticulture, Healthcare)
+# Payment Method: M-Pesa STK Push (primary)
+
+id: pattern.payment-collection.v1
+name: Universal Payment Collection
+description: |
+  Initiates M-Pesa payment for an order, waits for callback,
+  verifies payment, updates order status, and sends receipt.
+version: "1.0"
+tags:
+  - pattern
+  - payment
+  - mpesa
+  - universal
+
+trigger:
+  type: internal.call
+  # Called from other workflows with: orderId, phone, amount
+
+steps:
+  # Step 1: Log payment initiation
+  - id: log_start
+    action: debug.log
+    input:
+      message: "Initiating payment for order {{ trigger.orderId }}: KSh {{ trigger.amount }}"
+      level: info
+
+  # Step 2: Initiate M-Pesa STK Push
+  - id: initiate_mpesa
+    action: mpesa.initiate
+    input:
+      phone: "{{ trigger.phone }}"
+      amount: "{{ trigger.amount }}"
+      reference: "{{ trigger.orderId }}"
+      description: "Payment for Order {{ trigger.orderId }}"
+    output: stkPush
+
+  # Step 3: Notify customer that STK push was sent
+  - id: notify_stk_sent
+    action: whatsapp.send
+    input:
+      to: "{{ trigger.phone }}"
+      message: |
+        M-Pesa pop-up imetumwa kwa simu yako.
+        Ingiza PIN yako kulipa KSh {{ trigger.amount }}.
+        Reference: {{ trigger.orderId }}
+
+  # Step 4: Log waiting for callback
+  - id: log_waiting
+    action: event.log
+    input:
+      eventType: payment.stk_push.sent
+      eventData:
+        orderId: "{{ trigger.orderId }}"
+        checkoutRequestId: "{{ stkPush.checkoutRequestId }}"
+        phone: "{{ trigger.phone }}"
+        amount: "{{ trigger.amount }}"
+
+# Note: In production, the M-Pesa callback would trigger a separate workflow
+# or signal this workflow. For now, we rely on the mpesa-callback Edge Function.

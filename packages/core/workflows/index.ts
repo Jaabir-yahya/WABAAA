@@ -41,3 +41,18 @@ export type {
 export {
   executeStep,
 } from './step-executor';
+
+// Pattern Registry
+export type {
+  PatternId,
+  PatternDefinition,
+  PatternParam,
+  PatternMetadata,
+} from './pattern-registry';
+
+export {
+  PatternRegistry,
+  patternRegistry,
+  createPatternRegistry,
+  PATTERN_METADATA,
+} from './pattern-registry';

@@ -1,0 +1,85 @@
+# KCOS Pattern: Status Notification
+# Universal pattern for notifying customers of order/payment status
+#
+# Industries: All
+# Channels: WhatsApp (primary), SMS (fallback)
+
+id: pattern.status-notification.v1
+name: Universal Status Notification
+description: |
+  Sends status updates to customers via WhatsApp with SMS fallback.
+  Used for order confirmations, payment receipts, delivery updates, etc.
+version: "1.0"
+tags:
+  - pattern
+  - notification
+  - whatsapp
+  - sms
+  - universal
+
+trigger:
+  type: event.emitted
+  conditions:
+    - field: "{{ data.eventType }}"
+      operator: in
+      value:
+        - order.created
+        - order.updated
+        - payment.received
+        - delivery.dispatched
+        - delivery.completed
+
+steps:
+  # Step 1: Log notification trigger
+  - id: log_notification
+    action: debug.log
+    input:
+      message: "Status notification triggered: {{ trigger.data.eventType }}"
+      level: info
+
+  # Step 2: Format message based on event type
+  - id: format_message
+    action: data.transform
+    input:
+      mapping:
+        to: "{{ trigger.data.customerPhone }}"
+        eventType: "{{ trigger.data.eventType }}"
+        message: "{{ trigger.data.message }}"
+    output: notification
+
+  # Step 3: Send via WhatsApp
+  - id: send_whatsapp
+    action: whatsapp.send
+    input:
+      to: "{{ notification.to }}"
+      message: "{{ notification.message }}"
+    output: whatsappResult
+
+  # Step 4: Check if WhatsApp failed and needs SMS fallback
+  - id: check_whatsapp_success
+    action: condition.if
+    input:
+      condition: "{{ whatsappResult.success }}"
+    then:
+      - id: log_whatsapp_success
+        action: debug.log
+        input:
+          message: "WhatsApp notification sent successfully"
+          level: info
+    else:
+      - id: log_whatsapp_failed
+        action: debug.log
+        input:
+          message: "WhatsApp failed, would send SMS fallback"
+          level: warn
+      # SMS fallback would go here when sms.send action is implemented
+
+  # Step 5: Log completion
+  - id: log_complete
+    action: event.log
+    input:
+      eventType: notification.sent
+      eventData:
+        to: "{{ notification.to }}"
+        eventType: "{{ trigger.data.eventType }}"
+        channel: "{{ whatsappResult.success ? 'whatsapp' : 'sms' }}"

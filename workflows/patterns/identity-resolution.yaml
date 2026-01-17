@@ -1,0 +1,66 @@
+# KCOS Pattern: Identity Resolution
+# Universal pattern for resolving customer/actor identity
+#
+# Industries: All
+# Identifiers: Phone number (primary), QR code (secondary)
+
+id: pattern.identity-resolution.v1
+name: Universal Identity Resolution
+description: |
+  Resolves customer identity from phone number or QR code.
+  Creates new actor record if not found.
+  Returns actor ID and profile for use in other workflows.
+version: "1.0"
+tags:
+  - pattern
+  - identity
+  - actor
+  - universal
+
+trigger:
+  type: internal.call
+  # Called with: phone (required), qrData (optional)
+
+steps:
+  # Step 1: Log identity lookup
+  - id: log_lookup
+    action: debug.log
+    input:
+      message: "Resolving identity for phone: {{ trigger.phone }}"
+      level: info
+
+  # Step 2: Try to resolve existing actor
+  - id: resolve_actor
+    action: actor.resolve
+    input:
+      phone: "{{ trigger.phone }}"
+    output: actor
+
+  # Step 3: Check if QR data provides additional context
+  - id: check_qr_data
+    action: condition.if
+    input:
+      condition: "{{ trigger.qrData != null }}"
+    then:
+      - id: decode_qr
+        action: qr.decode
+        input:
+          data: "{{ trigger.qrData }}"
+        output: qrContext
+      
+      - id: log_qr_context
+        action: debug.log
+        input:
+          message: "QR context resolved: {{ qrContext.type }} - {{ qrContext.id }}"
+          level: info
+
+  # Step 4: Log completion
+  - id: log_complete
+    action: event.log
+    input:
+      eventType: identity.resolved
+      eventData:
+        actorId: "{{ actor.id }}"
+        phone: "{{ trigger.phone }}"
+        isNew: "{{ actor.isNew }}"
+        hasQrContext: "{{ trigger.qrData != null }}"

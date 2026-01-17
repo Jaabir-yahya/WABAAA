@@ -1,0 +1,93 @@
+# KCOS Pattern: Order Intake
+# Universal pattern for receiving and creating orders across industries
+# 
+# Industries: Retail, Restaurant, Automotive, Horticulture, Healthcare
+# Channels: WhatsApp (primary), QR scan (context), Web (future)
+
+id: pattern.order-intake.v1
+name: Universal Order Intake
+description: |
+  Receives order requests from any channel, resolves customer identity,
+  parses intent, validates against inventory, creates order record,
+  and confirms back to customer.
+version: "1.0"
+tags:
+  - pattern
+  - order
+  - intake
+  - universal
+
+trigger:
+  type: whatsapp.received
+
+steps:
+  # Step 1: Resolve context (where did this come from?)
+  - id: log_intake
+    action: debug.log
+    input:
+      message: "Order intake from {{ trigger.from }}"
+      level: info
+
+  # Step 2: Resolve or create customer identity
+  - id: resolve_customer
+    action: actor.resolve
+    input:
+      phone: "{{ trigger.from }}"
+    output: customer
+
+  # Step 3: Parse order intent from natural language
+  - id: parse_order
+    action: document.parse
+    input:
+      text: "{{ trigger.text }}"
+      type: order
+    output: parsed
+    onError: continue
+
+  # Step 4: Check if parsing succeeded
+  - id: check_parsed
+    action: condition.if
+    input:
+      condition: "{{ parsed.success }}"
+    then:
+      # Step 5: Create order record
+      - id: create_order
+        action: order.create
+        input:
+          customerPhone: "{{ trigger.from }}"
+          customerName: "{{ customer.name }}"
+          items: "{{ parsed.items }}"
+          totalAmount: "{{ parsed.total }}"
+          source: whatsapp
+        output: order
+
+      # Step 6: Confirm to customer
+      - id: send_confirmation
+        action: whatsapp.send
+        input:
+          to: "{{ trigger.from }}"
+          message: |
+            Asante {{ customer.name }}! 
+            Oda yako: {{ order.items }}
+            Jumla: KSh {{ order.totalAmount }}
+            Order #{{ order.id }}
+    else:
+      # Parsing failed - ask for clarification
+      - id: request_clarification
+        action: whatsapp.send
+        input:
+          to: "{{ trigger.from }}"
+          message: |
+            Samahani, sikuelewa vizuri. 
+            Tafadhali andika tena unachotaka.
+            Mfano: "Nataka sukari 2kg na maziwa 1 lita"
+
+  # Step 7: Log completion
+  - id: log_complete
+    action: event.log
+    input:
+      eventType: order.intake.completed
+      eventData:
+        customerId: "{{ customer.id }}"
+        orderCreated: "{{ order.id }}"
+        source: whatsapp

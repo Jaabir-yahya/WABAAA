@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "0002-ledger-audit-and-idempotency.md",
+                "file": "diagrams/01-system-architecture.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "0002-ledger-audit-and-idempotency"
+              "title": "01-system-architecture"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "0002-ledger-audit-and-idempotency.md",
+                "file": "diagrams/01-system-architecture.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for 0002-ledger-audit-and-idempotency"
+              "title": "Backlinks for 01-system-architecture"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "0002-ledger-audit-and-idempotency.md",
+                "file": "diagrams/01-system-architecture.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from 0002-ledger-audit-and-idempotency"
+              "title": "Outgoing links from 01-system-architecture"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "0002-ledger-audit-and-idempotency.md",
+                "file": "diagrams/01-system-architecture.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 0002-ledger-audit-and-idempotency"
+              "title": "Outline of 01-system-architecture"
             }
           }
         ]
@@ -185,36 +185,42 @@
   },
   "active": "22dab27180264d7c",
   "lastOpenFiles": [
-    "uml/09-example-workflows.md",
-    "uml/08-trigger-catalog.md",
-    "uml/07-multi-tenant.md",
-    "uml/06-integration-patterns.md",
     "uml/05-data-architecture.md",
-    "uml/04-workflow-execution.md",
-    "uml/03-action-registry.md",
-    "uml/02-lego-architecture.md",
-    "uml/01-system-architecture.md",
-    "uml/00-README.md",
+    "uml",
+    "architecture/KCOS-DOCUMENTATION-INDEX.md",
+    "architecture/README.md",
+    "reference/README.md",
+    "clients/README.md",
+    "state-machines/README.md",
+    "database/README.md",
+    "adr/README.md",
+    "flows/README.md",
+    "integrations/README.md",
+    "HOME.md",
+    "architecture/QR_IMPLEMENTATION.md",
+    "architecture/ROADMAP.md",
+    "reference/SECURITY_AUDIT.md",
+    "reference/PARTNER_INTEGRATION.md",
+    "reference/MERCHANT-AGREEMENT.md",
+    "reference/DATA-PROMISE.md",
+    "clients/ELIXOSENSE.md",
+    "clients",
+    "reference",
+    "archive/SETUP_CHECKLIST.md",
+    "archive/RESEARCH_PLAYBOOK.md",
+    "archive/RESEARCH_LOG.md",
+    "archive/REG_PLATFORM_NOTES.md",
+    "archive/PROJECT_CONTEXT.md",
+    "archive/MCP_SETUP.md",
+    "archive/KENYA_COMMERCE_OS_CONTEXT_DUMP.md",
+    "archive/HUMAN_GUIDE.md",
+    "archive",
+    "diagrams",
+    "adr",
+    "architecture",
     "uml/Kenya Commerce OS - Database Schema.png",
-    "KCOS-COMMERCE-PRIMITIVES.md",
-    "KCOS-VISION-AND-FUTURE.md",
-    "KCOS-DOCUMENTATION-INDEX.md",
-    "KCOS-INDUSTRY-WORKFLOW-GUIDE.md",
-    "KCOS-RESEARCH-IMPLEMENTATION-GUIDE.md",
-    "KCOS-QUICK-START.md",
-    "KCOS-ARCHITECTURE-VALIDATION.md",
-    "KCOS-IMPLEMENTATION-PLAN.md",
-    "KCOS-WORKFLOW-SPECIFICATION.md",
-    "KCOS-ACTION-SPECIFICATION.md",
-    "KCOS-LEGO-ARCHITECTURE.md",
-    "SECURITY_AUDIT.md",
-    "PARTNER_INTEGRATION.md",
-    "QR_IMPLEMENTATION.md",
-    "integrations/SMS.md",
-    "integrations/MPESA.md",
     "integrations",
     "database",
-    "state-machines",
-    "flows"
+    "state-machines"
   ]
 }
