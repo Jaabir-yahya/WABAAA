@@ -6,6 +6,42 @@
 
 ---
 
+## Day 3 (January 19, 2026 - Everything Lite Completion)
+
+### **Objective:** Close critical gaps + align docs to "Everything Lite" pivot
+
+**Status:** ✅ COMPLETE
+
+### **What Got Done**
+
+**Critical Implementation Gaps Closed**
+- ✅ `payment.record` action (manual cash/bank/cheque payments)
+- ✅ `sms.send` action + WhatsApp fallback
+- ✅ Auth middleware (Supabase JWT)
+- ✅ Workflow scheduler (cron execution)
+- ✅ `loop.each` control action
+- ✅ Rate limiting middleware (API)
+- ✅ Cash reconciliation migration + action
+
+**Documentation Updated**
+- ✅ START-HERE.md (Everything Lite positioning)
+- ✅ README.md (unified lite suite)
+- ✅ ARCHITECTURE.md (config-driven variability)
+- ✅ Archived outdated docs into `archive/old-docs/`
+- ✅ Added flows: RETAIL, SERVICES, updated RESTAURANT
+
+### **Notes**
+- eTIMS integration intentionally deferred
+- Scheduler enabled by default (`SCHEDULER_ENABLED` env to disable)
+- SMS integration is stubbed pending provider setup
+
+### **Next Steps**
+1. Run tests + lint + build
+2. Smoke-check actions and routes
+3. Git commit + push
+
+---
+
 ## Day 0 (January 16, 2026 - Foundation)
 
 ### **Objective:** Project Pivot & Integration Planning

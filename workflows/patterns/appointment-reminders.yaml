@@ -1,0 +1,55 @@
+# KCOS Pattern: Appointment Reminders
+# Sends reminders for upcoming appointments
+#
+# Industries: Services
+# Trigger: Scheduled (every 2 hours)
+
+id: pattern.appointment-reminders.v1
+name: Appointment Reminders
+description: |
+  Fetches upcoming appointments and sends WhatsApp reminders.
+version: "1.0"
+tags:
+  - pattern
+  - appointments
+  - reminders
+  - scheduled
+
+trigger:
+  type: schedule.cron
+  schedule: "0 */2 * * *"
+
+steps:
+  - id: log_start
+    action: debug.log
+    input:
+      message: "Running appointment reminders for {{ trigger.businessId }}"
+      level: info
+
+  - id: fetch_upcoming
+    action: data.transform
+    when: "{{ business.config.enableAppointments }}"
+    input:
+      mapping:
+        appointments: "{{ trigger.metrics.upcomingAppointments }}"
+    output: upcoming
+
+  - id: should_notify
+    action: condition.if
+    when: "{{ upcoming.appointments.length > 0 }}"
+    input:
+      condition: "{{ upcoming.appointments.length > 0 }}"
+    then:
+      - id: format_summary
+        action: data.transform
+        input:
+          mapping:
+            message: |
+              📅 *Appointment Zilizokaribia*
+              {{ upcoming.appointments.map(a => a.service_name + ' - ' + a.scheduled_at).join('\n') }}
+        output: formatted
+      - id: send_summary
+        action: whatsapp.send
+        input:
+          to: "{{ trigger.ownerPhone }}"
+          message: "{{ formatted.message }}"

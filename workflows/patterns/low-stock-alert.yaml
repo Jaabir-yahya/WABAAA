@@ -1,0 +1,60 @@
+# KCOS Pattern: Low Stock Alerts
+# Notifies merchant when stock falls below reorder threshold
+#
+# Industries: Retail
+# Trigger: Scheduled (9 AM EAT daily)
+
+id: pattern.low-stock-alert.v1
+name: Low Stock Alerts
+description: |
+  Checks inventory levels and notifies business owner if items are low.
+version: "1.0"
+tags:
+  - pattern
+  - inventory
+  - scheduled
+  - alerts
+
+trigger:
+  type: schedule.cron
+  schedule: "0 9 * * *"  # 9 AM daily (EAT)
+
+steps:
+  - id: log_start
+    action: debug.log
+    input:
+      message: "Running low-stock alert for {{ trigger.businessId }}"
+      level: info
+
+  - id: check_inventory
+    action: inventory.check
+    when: "{{ business.config.enableInventory }}"
+    input:
+      threshold: "reorder_point"
+    output: lowStock
+
+  - id: should_alert
+    action: condition.if
+    input:
+      condition: "{{ lowStock.items.length > 0 }}"
+    then:
+      - id: format_alert
+        action: data.transform
+        input:
+          mapping:
+            message: |
+              ⚠️ *Bidhaa Zimepungua*
+              {{ lowStock.items.map(i => i.name + ': ' + i.current + ' (min: ' + i.reorder + ')').join('\n') }}
+              Oda bidhaa hizi leo!
+        output: alert
+      - id: send_alert
+        action: whatsapp.send
+        input:
+          to: "{{ trigger.ownerPhone }}"
+          message: "{{ alert.message }}"
+    else:
+      - id: no_action
+        action: debug.log
+        input:
+          message: "No low stock items for {{ trigger.businessId }}"
+          level: info

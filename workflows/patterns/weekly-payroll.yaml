@@ -1,0 +1,53 @@
+# KCOS Pattern: Weekly Payroll Summary
+# Calculates weekly commissions and sends summary
+#
+# Industries: Retail, Restaurant, Services
+# Trigger: Scheduled (Friday 6 PM)
+
+id: pattern.weekly-payroll.v1
+name: Weekly Payroll Summary
+description: |
+  Calculates weekly commissions and notifies owner with totals.
+version: "1.0"
+tags:
+  - pattern
+  - payroll
+  - scheduled
+  - weekly
+
+trigger:
+  type: schedule.cron
+  schedule: "0 18 * * 5"  # Friday 6 PM EAT
+
+steps:
+  - id: log_start
+    action: debug.log
+    input:
+      message: "Running weekly payroll for {{ trigger.businessId }}"
+      level: info
+
+  - id: calculate_commissions
+    action: commission.calculate
+    when: "{{ business.config.enableCommissions }}"
+    input:
+      businessId: "{{ trigger.businessId }}"
+      periodStart: "{{ $dateAdd($now(), -7, 'day') }}"
+      periodEnd: "{{ $now() }}"
+    output: payroll
+
+  - id: format_message
+    action: data.transform
+    when: "{{ business.config.enableCommissions }}"
+    input:
+      mapping:
+        message: |
+          💰 *Payroll ya Wiki Hii*
+          {{ payroll.commissions.map(c => c.employeeId + ': KSh ' + c.totalCommission).join('\n') }}
+    output: formatted
+
+  - id: send_summary
+    action: whatsapp.send
+    when: "{{ business.config.enableCommissions }}"
+    input:
+      to: "{{ trigger.ownerPhone }}"
+      message: "{{ formatted.message }}"

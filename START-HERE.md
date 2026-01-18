@@ -1,31 +1,48 @@
-# START HERE: KCOS (Commerce Primitives)
+# START HERE: Kenya Commerce OS - Everything Lite
 
-**Status:** Foundation built | Workflow engine ready  
-**Focus:** Commerce primitives → patterns → industry configuration
+**Status:** Core-Outwards Build Complete | Everything Lite Architecture  
+**Focus:** Unified lite suite for Kenya SMEs - Retail, Services, Restaurant, Bookkeeping
 
 ---
 
 ## What KCOS Is Now
 
-KCOS is a **workflow platform for Kenyan commerce**, built around universal primitives:
-Order Intake → Identity → Payment → Notification → Reconciliation.
+KCOS is a **unified "lite everything" commerce platform** for Kenya. One system that provides:
 
-**You already have:**
-- Action system + registry
-- Workflow engine + step executor
-- JSONata expression evaluator
-- HTTP API server
-- Kenya actions: WhatsApp, M-Pesa, QR, Order, Actor
-- First workflow: `workflows/elixosense/order-flow.yaml`
+- Lite POS (sales, inventory counts)
+- Lite CRM (customer debts, payment history)
+- Lite Bookkeeping (expenses, supplier debts, commissions)
+- Lite Services (appointments, reminders)
+- Lite Restaurant (menu, orders, kitchen)
+
+**Built for Kenya:**
+- M-Pesa + WhatsApp + SMS
+- Offline-first (IndexedDB sync)
+- Multi-tenant with RLS
+- Event-sourced audit trail
+- Config-driven variability
 
 ---
 
-## The Right Reading Order
+## Architecture: Three-Layer Variability
 
-1. [`docs/KCOS-COMMERCE-PRIMITIVES.md`](docs/KCOS-COMMERCE-PRIMITIVES.md)  
-2. [`docs/KCOS-LEGO-ARCHITECTURE.md`](docs/KCOS-LEGO-ARCHITECTURE.md)  
-3. [`docs/KCOS-QUICK-START.md`](docs/KCOS-QUICK-START.md)  
-4. [`docs/KCOS-DOCUMENTATION-INDEX.md`](docs/KCOS-DOCUMENTATION-INDEX.md)  
+1. **Config** - Business type defines features (retail, services, restaurant)
+2. **Actions** - Atomic operations (50+ built-in)
+3. **Workflows** - Conditional compositions based on config
+
+Same business type can have different features without code changes.
+
+---
+
+## Quick Start
+
+See [`docs/architecture/KCOS-QUICK-START.md`](docs/architecture/KCOS-QUICK-START.md)
+
+---
+
+## Documentation Index
+
+See [`docs/architecture/KCOS-DOCUMENTATION-INDEX.md`](docs/architecture/KCOS-DOCUMENTATION-INDEX.md)
 
 ---
 
@@ -41,15 +58,3 @@ npm run dev:api
 # Run core tests
 npm run test:core
 ```
-
----
-
-## Where to Build Next
-
-1. Implement **pattern workflows** (order-intake, payment-collection, notification).
-2. Add **industry configs** (retail, restaurant, automotive, horticulture).
-3. Wire **templates** to WhatsApp/SMS.
-
----
-
-If you’re unsure where to go, read `docs/KCOS-COMMERCE-PRIMITIVES.md` and build the first pattern workflow end-to-end.

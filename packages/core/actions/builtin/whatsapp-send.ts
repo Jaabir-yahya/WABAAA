@@ -5,6 +5,7 @@
  */
 
 import { defineAction, success, failure, objectSchema, stringProp } from '../helpers';
+import { actionRegistry } from '../registry';
 import { createWhatsAppClient } from '../../../integrations/whatsapp/client';
 
 let cachedClient: ReturnType<typeof createWhatsAppClient> | null = null;
@@ -54,7 +55,7 @@ export const whatsappSendAction = defineAction({
   retryable: true,
   idempotent: true,
 
-  async execute(input) {
+  async execute(input, context) {
     try {
       const to = input.to as string;
       const message = input.message as string | undefined;
@@ -79,6 +80,14 @@ export const whatsappSendAction = defineAction({
       }
 
       if (!result.success) {
+        const fallback = await sendSmsFallback(
+          to,
+          message || `Template ${template || 'message'}`,
+          context
+        );
+        if (fallback.success) {
+          return fallback;
+        }
         return failure(result.error || 'Failed to send WhatsApp message', {
           errorCode: 'WHATSAPP_SEND_FAILED',
           shouldRetry: true,
@@ -90,6 +99,14 @@ export const whatsappSendAction = defineAction({
         status: 'sent',
       });
     } catch (error) {
+      const fallback = await sendSmsFallback(
+        (input.to as string) || '',
+        (input.message as string) || 'Message unavailable',
+        context
+      );
+      if (fallback.success) {
+        return fallback;
+      }
       return failure(
         error instanceof Error ? error.message : String(error),
         { errorCode: 'WHATSAPP_ERROR', shouldRetry: true }
@@ -97,3 +114,25 @@ export const whatsappSendAction = defineAction({
     }
   },
 });
+
+async function sendSmsFallback(
+  to: string,
+  message: string,
+  context: Parameters<typeof whatsappSendAction.execute>[1]
+) {
+  const smsAction = actionRegistry.get('sms.send');
+  if (!smsAction) {
+    return failure('SMS fallback unavailable', {
+      errorCode: 'SMS_FALLBACK_MISSING',
+      shouldRetry: false,
+    });
+  }
+
+  return smsAction.execute(
+    {
+      to,
+      message: message.slice(0, 160),
+    },
+    context
+  );
+}

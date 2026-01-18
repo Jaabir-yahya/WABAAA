@@ -1,83 +1,46 @@
-# Kenya Commerce OS (KCOS)
+# Kenya Commerce OS - Everything Lite
 
-**A commerce platform for Kenya built on WhatsApp, M-Pesa, and QR.**
+**A unified commerce platform for Kenyan SMEs. One system, many use cases.**
 
-KCOS is organized around **commerce primitives** (Order Intake, Identity, Payment, Notification, Reconciliation). Industries become **configuration**, not bespoke code.
+## What Makes KCOS Different
 
-## What KCOS Is
+Kenyans don't want scattered point solutions. They want **everything lite** in one place:
 
-- **Composable actions** that can be wired into workflows
-- **Kenya-first channels**: WhatsApp + M-Pesa + QR with SMS fallback
-- **Workflow engine** that executes YAML definitions
-- **Multi-tenant by default** with an event store and idempotency
+- Lite POS - Quick sales recording, not complex retail systems
+- Lite CRM - Customer debts and history, not enterprise CRM
+- Lite Bookkeeping - Expenses, suppliers, profit tracking
+- Lite Services - Appointments and reminders for salons, mechanics
+- Lite Restaurant - Menu, orders, kitchen - simple
 
-## Commerce Primitives (The Core Idea)
+## Built for Kenya
 
-Every industry repeats the same core moves. KCOS targets the 80% common pattern:
+- M-Pesa first - STK Push, callbacks, reconciliation
+- WhatsApp native - Orders, reminders, receipts via WhatsApp
+- Offline-first - Works on 2G/3G, syncs when online
+- Multi-tenant - One codebase, 1000s of businesses
+- Event-sourced - Dispute-grade audit trail
 
-- Order Intake → Identity → Catalog/Inventory → Pricing → Payment → Fulfillment → Notification → Reconciliation
+## Architecture
 
-See [`docs/KCOS-COMMERCE-PRIMITIVES.md`](docs/KCOS-COMMERCE-PRIMITIVES.md) for the full framework and pattern workflows.
+Config-driven variability:
+- Same codebase serves retail, services, restaurant
+- Feature flags enable/disable modules per business
+- Actions are atomic, workflows compose them
+- Events are immutable, projections are queryable
 
-## Current State (Built)
+## Tech Stack
 
-- **Workflow engine** with branching and step execution
-- **Action system** + registry + helpers
-- **12 actions** (Kenya + built-ins): `whatsapp.send`, `mpesa.initiate`, `mpesa.verify`, `order.create`, `actor.resolve`, `qr.generate`, `qr.decode`, `debug.log`, `event.log`, `condition.if`, `data.transform`, `http.request`
-- **HTTP API server** to execute workflows
-- **Workflow DSL** (YAML) with loader
-- **Idempotency system** + workflow tables
-- **First workflow**: `workflows/elixosense/order-flow.yaml`
+- Backend: Supabase (Postgres + Auth + Edge Functions)
+- Core: TypeScript actions + workflow engine
+- Frontend: Svelte 5 PWAs (merchant, storefront)
+- Integrations: M-Pesa Daraja, WhatsApp Cloud API, Africa's Talking SMS
 
-## Getting Started (API + Core)
+## Getting Started
 
 ```bash
-# Install dependencies
 npm install
-
-# Run the KCOS API server (workflow execution)
 npm run dev:api
-
-# Run core tests
-npm run test:core
+npm run dev:merchant
 ```
 
-## Project Structure (Key Paths)
-
-```
-repo-root/
-├── apps/                    # Frontend apps (merchant, svelte PWA)
-├── packages/
-│   ├── api/                 # HTTP API server
-│   ├── core/                # Actions, workflows, expressions, idempotency
-│   ├── database/            # Migrations and schema
-│   └── integrations/        # External integration helpers
-├── supabase/                # Edge Functions (Deno) + migrations
-├── workflows/               # YAML workflow definitions
-└── docs/                    # KCOS documentation
-```
-
-## Documentation
-
-Start here:
-
-- [`docs/KCOS-DOCUMENTATION-INDEX.md`](docs/KCOS-DOCUMENTATION-INDEX.md)
-- [`docs/KCOS-COMMERCE-PRIMITIVES.md`](docs/KCOS-COMMERCE-PRIMITIVES.md)
-- [`docs/KCOS-LEGO-ARCHITECTURE.md`](docs/KCOS-LEGO-ARCHITECTURE.md)
-- [`docs/KCOS-QUICK-START.md`](docs/KCOS-QUICK-START.md)
-
-## Tech Stack (Locked)
-
-- **Frontend**: Svelte 5 + SvelteKit + TypeScript
-- **Backend**: Supabase (PostgreSQL + Auth + Realtime + Edge Functions)
-- **Workflow engine**: KCOS core (Temporal planned)
-- **Expressions**: JSONata
-
-## Status
-
-**Phase:** Foundation + workflow engine ready  
-**Next:** Add more pattern workflows + industry configs
-
----
-
-**Built for Kenyan merchants who deserve better tools.**
+See [`docs/architecture/KCOS-QUICK-START.md`](docs/architecture/KCOS-QUICK-START.md) for full setup.

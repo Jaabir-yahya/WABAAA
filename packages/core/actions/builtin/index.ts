@@ -31,6 +31,34 @@ import { productUpdateAction } from './product-update';
 import { catalogSearchAction } from './catalog-search';
 import { catalogBrowseAction } from './catalog-browse';
 import { catalogResolveItemsAction } from './catalog-resolve-items';
+import { expenseRecordAction } from './expense-record';
+import { expenseCategorizeAction } from './expense-categorize';
+import { expenseLinkToSupplierAction } from './expense-link-to-supplier';
+import { supplierCreateAction } from './supplier-create';
+import { supplierRecordPurchaseAction } from './supplier-record-purchase';
+import { supplierRecordPaymentAction } from './supplier-record-payment';
+import { supplierCheckDebtAction } from './supplier-check-debt';
+import { employeeRecordSaleAction } from './employee-record-sale';
+import { commissionCalculateAction } from './commission-calculate';
+import { wageRecordPaymentAction } from './wage-record-payment';
+import { payrollGenerateSummaryAction } from './payroll-generate-summary';
+import { serviceCreateAction } from './service-create';
+import { appointmentCreateAction } from './appointment-create';
+import { appointmentConfirmAction } from './appointment-confirm';
+import { appointmentReminderAction } from './appointment-reminder';
+import { calendarCheckAvailabilityAction } from './calendar-check-availability';
+import { transferInitiateAction } from './transfer-initiate';
+import { transferVerifyAction } from './transfer-verify';
+import { kycCheckAction } from './kyc-check';
+import { floatCheckAction } from './float-check';
+import { floatRequestAction } from './float-request';
+import { menuUpdateAction } from './menu-update';
+import { kitchenNotifyAction } from './kitchen-notify';
+import { tableAssignAction } from './table-assign';
+import { paymentRecordAction } from './payment-record';
+import { smsSendAction } from './sms-send';
+import { loopEachAction } from './loop-each';
+import { cashReconcileAction } from './cash-reconcile';
 
 // Kenya-specific actions
 import { whatsappSendAction } from './whatsapp-send';
@@ -64,6 +92,34 @@ export { productUpdateAction } from './product-update';
 export { catalogSearchAction } from './catalog-search';
 export { catalogBrowseAction } from './catalog-browse';
 export { catalogResolveItemsAction } from './catalog-resolve-items';
+export { expenseRecordAction } from './expense-record';
+export { expenseCategorizeAction } from './expense-categorize';
+export { expenseLinkToSupplierAction } from './expense-link-to-supplier';
+export { supplierCreateAction } from './supplier-create';
+export { supplierRecordPurchaseAction } from './supplier-record-purchase';
+export { supplierRecordPaymentAction } from './supplier-record-payment';
+export { supplierCheckDebtAction } from './supplier-check-debt';
+export { employeeRecordSaleAction } from './employee-record-sale';
+export { commissionCalculateAction } from './commission-calculate';
+export { wageRecordPaymentAction } from './wage-record-payment';
+export { payrollGenerateSummaryAction } from './payroll-generate-summary';
+export { serviceCreateAction } from './service-create';
+export { appointmentCreateAction } from './appointment-create';
+export { appointmentConfirmAction } from './appointment-confirm';
+export { appointmentReminderAction } from './appointment-reminder';
+export { calendarCheckAvailabilityAction } from './calendar-check-availability';
+export { transferInitiateAction } from './transfer-initiate';
+export { transferVerifyAction } from './transfer-verify';
+export { kycCheckAction } from './kyc-check';
+export { floatCheckAction } from './float-check';
+export { floatRequestAction } from './float-request';
+export { menuUpdateAction } from './menu-update';
+export { kitchenNotifyAction } from './kitchen-notify';
+export { tableAssignAction } from './table-assign';
+export { paymentRecordAction } from './payment-record';
+export { smsSendAction } from './sms-send';
+export { loopEachAction } from './loop-each';
+export { cashReconcileAction } from './cash-reconcile';
 
 // Kenya-specific actions
 export { whatsappSendAction } from './whatsapp-send';
@@ -101,6 +157,34 @@ export const builtinActions: Action[] = [
   catalogSearchAction,
   catalogBrowseAction,
   catalogResolveItemsAction,
+  expenseRecordAction,
+  expenseCategorizeAction,
+  expenseLinkToSupplierAction,
+  supplierCreateAction,
+  supplierRecordPurchaseAction,
+  supplierRecordPaymentAction,
+  supplierCheckDebtAction,
+  employeeRecordSaleAction,
+  commissionCalculateAction,
+  wageRecordPaymentAction,
+  payrollGenerateSummaryAction,
+  serviceCreateAction,
+  appointmentCreateAction,
+  appointmentConfirmAction,
+  appointmentReminderAction,
+  calendarCheckAvailabilityAction,
+  transferInitiateAction,
+  transferVerifyAction,
+  kycCheckAction,
+  floatCheckAction,
+  floatRequestAction,
+  menuUpdateAction,
+  kitchenNotifyAction,
+  tableAssignAction,
+  paymentRecordAction,
+  smsSendAction,
+  loopEachAction,
+  cashReconcileAction,
   // Kenya-specific
   whatsappSendAction,
   mpesaInitiateAction,

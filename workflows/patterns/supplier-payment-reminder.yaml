@@ -1,0 +1,54 @@
+# KCOS Pattern: Supplier Payment Reminder
+# Reminds owner about outstanding supplier balances
+#
+# Industries: Retail, Restaurant
+# Trigger: Scheduled (Monday 10 AM)
+
+id: pattern.supplier-payment-reminder.v1
+name: Supplier Payment Reminder
+description: |
+  Summarizes outstanding supplier balances and notifies the owner.
+version: "1.0"
+tags:
+  - pattern
+  - suppliers
+  - reminders
+  - scheduled
+
+trigger:
+  type: schedule.cron
+  schedule: "0 10 * * 1"  # Monday 10 AM EAT
+
+steps:
+  - id: log_start
+    action: debug.log
+    input:
+      message: "Running supplier payment reminder for {{ trigger.businessId }}"
+      level: info
+
+  - id: fetch_supplier_debt
+    action: supplier.check_debt
+    when: "{{ business.config.enableSupplierCredit }}"
+    input:
+      businessId: "{{ trigger.businessId }}"
+    output: debts
+
+  - id: should_alert
+    action: condition.if
+    when: "{{ business.config.enableSupplierCredit }}"
+    input:
+      condition: "{{ debts.suppliers.length > 0 }}"
+    then:
+      - id: format_message
+        action: data.transform
+        input:
+          mapping:
+            message: |
+              💸 *Madeni ya Suppliers*
+              {{ debts.suppliers.map(s => s.name + ': KSh ' + s.outstandingBalance).join('\n') }}
+        output: formatted
+      - id: send_alert
+        action: whatsapp.send
+        input:
+          to: "{{ trigger.ownerPhone }}"
+          message: "{{ formatted.message }}"

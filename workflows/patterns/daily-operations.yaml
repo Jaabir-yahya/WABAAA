@@ -1,0 +1,98 @@
+# KCOS Pattern: Daily Operations Summary
+# Aggregates revenue, expenses, commissions, and profit for the day
+#
+# Industries: Retail, Restaurant, Services
+# Trigger: Scheduled (9 PM EAT daily)
+
+id: pattern.daily-operations.v1
+name: Daily Operations Summary
+description: |
+  Summarizes revenue, expenses, commissions, and profit for the day.
+  Uses conditional steps based on business feature flags.
+version: "1.0"
+tags:
+  - pattern
+  - reporting
+  - scheduled
+  - daily
+
+trigger:
+  type: schedule.cron
+  schedule: "0 21 * * *"  # 9 PM daily (EAT)
+
+steps:
+  - id: log_start
+    action: debug.log
+    input:
+      message: "Starting daily operations summary for {{ trigger.businessId }}"
+      level: info
+
+  - id: aggregate_revenue
+    action: data.transform
+    input:
+      mapping:
+        businessId: "{{ trigger.businessId }}"
+        date: "{{ $now() }}"
+        totalOrders: "{{ trigger.metrics.totalOrders }}"
+        totalRevenue: "{{ trigger.metrics.totalRevenue }}"
+        outstandingAmount: "{{ trigger.metrics.outstandingAmount }}"
+    output: revenue
+
+  - id: aggregate_expenses
+    action: data.transform
+    when: "{{ business.config.enableExpenses }}"
+    input:
+      mapping:
+        totalExpenses: "{{ trigger.metrics.totalExpenses }}"
+        expenseCount: "{{ trigger.metrics.expenseCount }}"
+    output: expenses
+
+  - id: aggregate_commissions
+    action: data.transform
+    when: "{{ business.config.enableCommissions }}"
+    input:
+      mapping:
+        totalCommission: "{{ trigger.metrics.totalCommission }}"
+    output: commissions
+
+  - id: calculate_profit
+    action: data.transform
+    input:
+      mapping:
+        profit: "{{ revenue.totalRevenue - (expenses.totalExpenses || 0) }}"
+    output: profit
+
+  - id: format_summary
+    action: data.transform
+    input:
+      mapping:
+        message: |
+          📊 *Ripoti ya Leo*
+          
+          📦 Oda: {{ revenue.totalOrders }}
+          💰 Mapato: KSh {{ revenue.totalRevenue }}
+          ⚠️ Madeni: KSh {{ revenue.outstandingAmount }}
+          {% if expenses %}
+          💸 Matumizi: KSh {{ expenses.totalExpenses }}
+          {% endif %}
+          {% if commissions %}
+          🧾 Tume: KSh {{ commissions.totalCommission }}
+          {% endif %}
+          📈 Faida: KSh {{ profit.profit }}
+    output: formatted
+
+  - id: send_summary
+    action: whatsapp.send
+    input:
+      to: "{{ trigger.ownerPhone }}"
+      message: "{{ formatted.message }}"
+
+  - id: log_complete
+    action: event.log
+    input:
+      eventType: operations.daily.completed
+      eventData:
+        businessId: "{{ trigger.businessId }}"
+        date: "{{ revenue.date }}"
+        totalRevenue: "{{ revenue.totalRevenue }}"
+        totalExpenses: "{{ expenses.totalExpenses }}"

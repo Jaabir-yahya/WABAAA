@@ -20,6 +20,10 @@ export type ActionCategory =
   | 'integration'    // webhook, erp, api
   | 'qr'             // qr
   | 'control'        // condition, parallel, wait, loop
+  | 'financial'      // expenses, payroll, suppliers
+  | 'scheduling'     // appointments, calendar
+  | 'notification'   // kitchen, alerts
+  | 'compliance'     // KYC, audits
   | 'debug';         // debug, test
 
 // ═══════════════════════════════════════════════════════════════════════════════

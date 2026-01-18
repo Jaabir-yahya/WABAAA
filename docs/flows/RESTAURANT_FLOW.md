@@ -1,65 +1,30 @@
-# Restaurant Flow
+# Restaurant Flow - Everything Lite
 
-This flow describes restaurant ordering with menu item lookup and modifiers.
-
-## 1. Order With Modifiers
+## Order Intake to Kitchen
 
 ```mermaid
-sequenceDiagram
-  participant customer as Customer
-  participant whatsapp as WhatsApp
-  participant webhook as WAWebhook
-  participant parser as RestaurantParser
-  participant orders as Orders
-  participant modifiers as OrderModifiers
-
-  customer->>whatsapp: "chips mayai extra cheese"
-  whatsapp->>webhook: MessagePayload
-  webhook->>parser: ParseOrderText
-  parser-->>webhook: ItemsAndModifiers
-  webhook->>orders: CreateOrder
-  webhook->>modifiers: InsertModifiers
-  webhook->>whatsapp: ReplyWithETA
+flowchart TD
+  Order[OrderReceived] --> Parse[ParseMenuItems]
+  Parse --> CreateOrder[CreateOrder]
+  CreateOrder --> NotifyKitchen[KitchenNotify]
+  NotifyKitchen --> ETA[SendETA]
+  ETA --> Payment{PaymentMethod}
+  Payment -->|MPesa| Mpesa[AutoRecordPayment]
+  Payment -->|Cash| Cash[ManualCashEntry]
+  Payment -->|Credit| Credit[RecordCustomerDebt]
+  Payment --> Serve[PrepareAndServe]
 ```
 
-## 2. Menu Item Lookup
+## Lite Features Enabled
 
-```mermaid
-sequenceDiagram
-  participant webhook as WAWebhook
-  participant menu as MenuItems
-  participant orders as Orders
+- Menu item catalog
+- Simple kitchen notifications
+- Fast payment capture
+- Basic order tracking
 
-  webhook->>menu: FindMenuItemsByAlias
-  menu-->>webhook: MatchedItems
-  webhook->>orders: BuildOrderWithPrices
-```
+## Lite Features Disabled
 
-## 3. Prep Time Estimation
-
-```mermaid
-flowchart LR
-  order["OrderItems"]
-  baseTime["BasePrepTime"]
-  modifiers["Modifiers"]
-  total["EstimatedPrepTime"]
-
-  order --> baseTime
-  modifiers --> total
-  baseTime --> total
-```
-
-## 4. Fulfillment Sequence
-
-```mermaid
-sequenceDiagram
-  participant merchant as Merchant
-  participant pwa as MerchantPWA
-  participant customer as Customer
-
-  merchant->>pwa: OpenOrders
-  pwa-->>merchant: ShowPendingOrders
-  merchant->>customer: ConfirmReady
-  merchant->>customer: HandoverOrder
-```
+- Complex modifiers engine
+- Table management automation
+- Advanced inventory depletion
 
