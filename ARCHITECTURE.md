@@ -85,3 +85,12 @@ Same actions and tables, different features enabled.
 3. Feature flags prevent UI and workflow bloat.
 4. One platform replaces multiple scattered tools.
 
+## Database Schema Organization
+
+Tables are grouped into logical schemas to keep operational and system data clean:
+
+- `kcos_core`: Operational tables (orders, payments, customer_notes, order_notifications)
+- `kcos_system`: Infrastructure tables (commerce_events, businesses, business_users, api_keys)
+- `public`: Legacy tables and compatibility views
+
+All new code should use schema-qualified table names (e.g., `kcos_core.orders`).

@@ -1,13 +1,16 @@
 import { Router } from 'express';
-import { getSupabaseClient } from './supabase';
+import { getSupabaseWithContext } from './supabase';
 
 export function createReportsRouter(): Router {
   const router = Router();
 
-  router.get('/daily', async (_req, res) => {
+  router.get('/daily', async (req, res) => {
     try {
-      const supabase = getSupabaseClient();
-      const { data, error } = await supabase.from('daily_revenue').select('*');
+      const tenantId = (req as any).tenantId as string;
+      const supabase = await getSupabaseWithContext(tenantId);
+      const { data, error } = await supabase
+        .from('public.daily_revenue')
+        .select('*');
       if (error) return res.status(500).json({ error: error.message });
       return res.json({ dailyRevenue: data || [] });
     } catch (error) {
@@ -16,10 +19,13 @@ export function createReportsRouter(): Router {
     }
   });
 
-  router.get('/profit-loss', async (_req, res) => {
+  router.get('/profit-loss', async (req, res) => {
     try {
-      const supabase = getSupabaseClient();
-      const { data, error } = await supabase.from('profit_loss_current_month').select('*');
+      const tenantId = (req as any).tenantId as string;
+      const supabase = await getSupabaseWithContext(tenantId);
+      const { data, error } = await supabase
+        .from('public.profit_loss_current_month')
+        .select('*');
       if (error) return res.status(500).json({ error: error.message });
       return res.json({ profitLoss: data || [] });
     } catch (error) {

@@ -1,12 +1,13 @@
 import { Router } from 'express';
-import { getSupabaseClient } from './supabase';
+import { getSupabaseWithContext } from './supabase';
 
 export function createCustomersRouter(): Router {
   const router = Router();
 
-  router.get('/', async (_req, res) => {
+  router.get('/', async (req, res) => {
     try {
-      const supabase = getSupabaseClient();
+      const tenantId = (req as any).tenantId as string;
+      const supabase = await getSupabaseWithContext(tenantId);
       const { data, error } = await supabase
         .from('customer_financial_profiles')
         .select('*');
@@ -20,7 +21,8 @@ export function createCustomersRouter(): Router {
 
   router.get('/:customerPhone', async (req, res) => {
     try {
-      const supabase = getSupabaseClient();
+      const tenantId = (req as any).tenantId as string;
+      const supabase = await getSupabaseWithContext(tenantId);
       const { data, error } = await supabase
         .from('customer_financial_profiles')
         .select('*')

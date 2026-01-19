@@ -12,6 +12,26 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const MPESA_IP_ALLOWLIST = new Set([
+  "196.201.214.200",
+  "196.201.214.206",
+  "196.201.213.114",
+  "196.201.214.207",
+  "196.201.214.208",
+  "196.201.213.44",
+  "196.201.212.127",
+  "196.201.212.128",
+  "196.201.212.129",
+]);
+
+function getClientIp(req: Request) {
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0]?.trim() ?? "unknown";
+  }
+  return req.headers.get("x-real-ip") ?? "unknown";
+}
+
 type CallbackMetadataItem = { Name: string; Value?: string | number };
 
 interface MpesaCallbackPayload {
@@ -185,7 +205,18 @@ export function createMpesaCallbackHandler(
     }
 
     try {
-      const ipAddress = req.headers.get("x-forwarded-for") ?? "unknown";
+      const ipAddress = getClientIp(req);
+      const allowlistDisabled =
+        Deno.env.get("MPESA_IP_ALLOWLIST_DISABLED") === "true";
+
+      if (!allowlistDisabled && !MPESA_IP_ALLOWLIST.has(ipAddress)) {
+        return jsonResponse(
+          { error: "Unauthorized IP" },
+          403,
+          corsHeaders,
+        );
+      }
+
       const userAgent = req.headers.get("user-agent") ?? "unknown";
       await enforceRateLimit({
         key: `mpesa-callback:${ipAddress}`,

@@ -15,3 +15,24 @@ export function getSupabaseClient(): SupabaseClient {
   cachedSupabase = createClient(url, serviceKey);
   return cachedSupabase;
 }
+
+export async function setBusinessContext(
+  supabase: SupabaseClient,
+  businessId: string
+): Promise<void> {
+  const { error } = await supabase.rpc('set_business_context', {
+    p_business_id: businessId,
+  });
+
+  if (error) {
+    throw new Error(`Failed to set business context: ${error.message}`);
+  }
+}
+
+export async function getSupabaseWithContext(
+  businessId: string
+): Promise<SupabaseClient> {
+  const supabase = getSupabaseClient();
+  await setBusinessContext(supabase, businessId);
+  return supabase;
+}

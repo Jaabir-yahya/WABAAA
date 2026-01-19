@@ -70,6 +70,21 @@ const PARSER_CONFIG = {
   },
 };
 
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs = 5000,
+) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function mergeParserConfig(config?: Record<string, unknown>) {
   const customRules = (config?.parser_rules as Record<string, unknown>) ?? {};
   const customAliases =
@@ -604,6 +619,7 @@ export async function processMessage(
       .insert({
         business_id: businessId,
         customer_phone: customerPhone,
+        source_message_id: messageId,
         total_amount: total,
         outstanding_amount: total,
         items,
@@ -643,7 +659,7 @@ export async function processMessage(
 
     const orderItems = formatItems(items);
 
-    const paymentResponse = await fetch(
+    const paymentResponse = await fetchWithTimeout(
       `${Deno.env.get("SUPABASE_URL")}/functions/v1/generate-payment-link`,
       {
         method: "POST",
@@ -656,6 +672,7 @@ export async function processMessage(
           order_id: order.id,
         }),
       },
+      5000,
     );
 
     const paymentOk = paymentResponse.ok;

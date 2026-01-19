@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { actionRegistry } from '@kenya-commerce-os/core/actions';
 import { buildActionContext } from './action-context';
-import { getSupabaseClient } from './supabase';
+import { getSupabaseWithContext } from './supabase';
 
 export function createExpensesRouter(): Router {
   const router = Router();
@@ -19,7 +19,8 @@ export function createExpensesRouter(): Router {
 
   router.get('/', async (req, res) => {
     try {
-      const supabase = getSupabaseClient();
+      const tenantId = (req as any).tenantId as string;
+      const supabase = await getSupabaseWithContext(tenantId);
       const { from, to, category, limit = '50' } = req.query;
       const query = supabase.from('expenses').select('*').limit(Number(limit));
       if (from) query.gte('expense_date', String(from));
@@ -36,7 +37,8 @@ export function createExpensesRouter(): Router {
 
   router.get('/summary', async (req, res) => {
     try {
-      const supabase = getSupabaseClient();
+      const tenantId = (req as any).tenantId as string;
+      const supabase = await getSupabaseWithContext(tenantId);
       const { from, to } = req.query;
       const query = supabase
         .from('expenses')

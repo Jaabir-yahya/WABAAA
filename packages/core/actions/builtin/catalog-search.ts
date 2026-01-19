@@ -9,6 +9,10 @@ import { defineAction, success, failure, objectSchema, stringProp, numberProp, b
 
 let cachedSupabase: SupabaseClient | null = null;
 
+function escapeIlike(value: string) {
+  return value.replace(/[%_\\]/g, '\\$&');
+}
+
 function getSupabaseClient(): SupabaseClient {
   if (cachedSupabase) return cachedSupabase;
 
@@ -60,7 +64,7 @@ export const catalogSearchAction = defineAction({
       const query = String(input.query ?? '').trim();
       const category = input.category as string | undefined;
       const activeOnly = (input.activeOnly as boolean | undefined) ?? true;
-      const limit = Number(input.limit ?? 20);
+      const limit = Math.min(Number(input.limit ?? 20), 100);
 
       if (!query) {
         return failure('Missing search query', {
@@ -69,11 +73,14 @@ export const catalogSearchAction = defineAction({
         });
       }
 
+      const escapedQuery = escapeIlike(query);
       let dbQuery = supabase
         .from('products')
         .select('id, sku, name, name_sw, category, price, currency, active')
         .eq('business_id', businessId)
-        .or(`name.ilike.%${query}%,sku.ilike.%${query}%,name_sw.ilike.%${query}%`)
+        .or(
+          `name.ilike.%${escapedQuery}%,sku.ilike.%${escapedQuery}%,name_sw.ilike.%${escapedQuery}%`
+        )
         .limit(limit);
 
       if (category) {

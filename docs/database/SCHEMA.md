@@ -78,6 +78,11 @@ erDiagram
 - Applied payments with M-Pesa receipts
 - Reconciles against orders
 
+### order_notifications
+- Tracks outbound notifications for idempotency
+- Prevents duplicate WhatsApp/SMS sends on retries
+- Primary key: (order_id, status, channel)
+
 ### menu_items
 - Restaurant menu catalog with aliases and modifiers
 

@@ -17,6 +17,7 @@ import { createServicesRouter } from './routes/services';
 import { createCustomersRouter } from './routes/customers';
 import { createReportsRouter } from './routes/reports';
 import { createRemittanceRouter } from './routes/remittance';
+import { createDashboardRouter } from './routes/dashboard';
 import { requireFeature } from './middleware/tier';
 import { requireAuth } from './middleware/auth';
 import { apiLimiter } from './middleware/rate-limit';
@@ -42,6 +43,38 @@ const workflowExecutions = new Map();
 
 // Create express app
 const app = express();
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin as string | undefined;
+  if (!origin || allowedOrigins.includes(origin)) {
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Authorization, Content-Type, Idempotency-Key, X-Request-Id'
+    );
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  }
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+
+  return next();
+});
+app.use((req, res, next) => {
+  const requestId = (req.headers['x-request-id'] as string) || crypto.randomUUID();
+  (req as Request & { requestId?: string }).requestId = requestId;
+  res.setHeader('x-request-id', requestId);
+  next();
+});
 app.use(express.json({ limit: '2mb' }));
 app.use('/api', apiLimiter);
 
@@ -65,10 +98,11 @@ app.use('/api/services', requireAuth, requireFeature('appointments'), createServ
 app.use('/api/customers', requireAuth, createCustomersRouter());
 app.use('/api/reports', requireAuth, requireFeature('advanced_reports'), createReportsRouter());
 app.use('/api/remittance', requireAuth, requireFeature('remittance'), createRemittanceRouter());
+app.use('/api/dashboard', requireAuth, createDashboardRouter());
 
 // Health check
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', version: '0.1.0' });
+  res.json({ status: 'ok' });
 });
 
 async function loadWorkflowDefinitions() {
@@ -96,6 +130,18 @@ async function loadWorkflowDefinitions() {
 }
 
 async function startServer() {
+  const requiredEnvVars = [
+    'SUPABASE_URL',
+    'SUPABASE_ANON_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY',
+  ];
+  for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+      console.error(`[KCOS API] Missing required env var: ${envVar}`);
+      process.exit(1);
+    }
+  }
+
   await loadWorkflowDefinitions();
 
   const scheduler = new WorkflowScheduler(engine);
@@ -108,10 +154,32 @@ async function startServer() {
   }
 
   const port = Number(process.env.PORT) || 3000;
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     console.log(`[KCOS API] Server running at http://localhost:${port}`);
   });
+
+  const shutdown = (signal: string) => {
+    console.log(`[KCOS API] Received ${signal}, shutting down...`);
+    server.close(() => {
+      console.log('[KCOS API] Server closed');
+      process.exit(0);
+    });
+
+    setTimeout(() => {
+      console.error('[KCOS API] Forced shutdown');
+      process.exit(1);
+    }, 10_000).unref();
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
+
+app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const ref = crypto.randomUUID();
+  console.error(`[KCOS API] Unhandled error (${ref})`, err);
+  res.status(500).json({ error: 'Internal server error', ref });
+});
 
 startServer().catch((error) => {
   console.error('[KCOS API] Failed to start server:', error);

@@ -9,6 +9,10 @@ import { defineAction, success, failure, objectSchema, stringProp } from '../hel
 
 let cachedSupabase: SupabaseClient | null = null;
 
+function normalizePhone(value: string) {
+  return value.replace(/[^0-9+]/g, '');
+}
+
 function getSupabaseClient(): SupabaseClient {
   if (cachedSupabase) return cachedSupabase;
 
@@ -51,11 +55,19 @@ export const kycCheckAction = defineAction({
       const supabase = getSupabaseClient();
       const businessId = (input.businessId as string) || context.tenantId;
 
+      const phone = normalizePhone(String(input.phone ?? ''));
+      if (!phone) {
+        return failure('Invalid phone number', {
+          errorCode: 'KYC_INVALID_PHONE',
+          shouldRetry: false,
+        });
+      }
+
       const { data: transfers, error } = await supabase
         .from('remittance_transfers')
         .select('kyc_verified')
         .eq('business_id', businessId)
-        .or(`sender_phone.eq.${input.phone},recipient_phone.eq.${input.phone}`)
+        .or(`sender_phone.eq.${phone},recipient_phone.eq.${phone}`)
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -69,7 +81,7 @@ export const kycCheckAction = defineAction({
       const kycVerified = transfers && transfers.length > 0 ? !!transfers[0].kyc_verified : false;
 
       return success({
-        phone: input.phone,
+        phone,
         kycVerified,
       });
     } catch (error) {

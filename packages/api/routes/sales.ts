@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { actionRegistry } from '@kenya-commerce-os/core/actions';
 import { buildActionContext } from './action-context';
-import { getSupabaseClient } from './supabase';
+import { getSupabaseWithContext } from './supabase';
 
 export function createSalesRouter(): Router {
   const router = Router();
@@ -31,9 +31,10 @@ export function createSalesRouter(): Router {
 
   router.get('/', async (req, res) => {
     try {
-      const supabase = getSupabaseClient();
+      const tenantId = (req as any).tenantId as string;
+      const supabase = await getSupabaseWithContext(tenantId);
       const { status, limit = '50' } = req.query;
-      const query = supabase.from('orders').select('*').limit(Number(limit));
+      const query = supabase.from('kcos_core.orders').select('*').limit(Number(limit));
       if (status) {
         query.eq('status', status);
       }
